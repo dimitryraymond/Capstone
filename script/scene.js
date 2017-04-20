@@ -1,7 +1,5 @@
 function Scene(canvasId)
 {
-  var self = this;
-
   this.models = [];
   this.camera = new Camera();
   this.fps = 30;
@@ -17,7 +15,15 @@ function Scene(canvasId)
   this.ctx.strokeStyle = this.defaultStrokeStyle;
   this.ctx.lineWidth = 1;
 
-  //initialize key input
+  //keyboard
+
+  this.initKeyboard();
+  this.initMouse();
+}
+
+Scene.prototype.initKeyboard = function()
+{
+  var self = this;
   this.keysDown = new Array(256);
   for(var i = 0; i < 256; i++){
     this.keysDown[i] = false;
@@ -28,6 +34,27 @@ function Scene(canvasId)
   }
   document.onkeyup = function(e){
     self.keysDown[e.keyCode] = false;
+  }
+}
+
+Scene.prototype.initMouse = function()
+{
+  //mouse
+  this.mouseCoords = {
+    x: this.canvas.width / 2,
+    y: this.canvas.width / 2
+  }
+
+  var canvasBounds = this.canvas.getBoundingClientRect();
+  var widthRatio = this.canvas.width / canvasBounds.width;
+  var heightRatio = this.canvas.height / canvasBounds.height;
+
+  var self = this;
+  document.onmousemove = function(e){
+    var x = (e.clientX - canvasBounds.left) * widthRatio;
+    var y = (e.clientY - canvasBounds.top) * heightRatio;
+
+    self.mouseCoords = {x, y};
   }
 }
 
@@ -60,11 +87,19 @@ Scene.prototype.updateInput = function()
     this.camera.slideUp();
   if(this.keysDown[key.q])
     this.camera.slideDown();
+
+  if(this.mouseCoords.x < 100)
+    this.camera.turnLeft();
+  else if(this.mouseCoords.x > 900)
+    this.camera.turnRight();
 }
 
 Scene.prototype.updatePhysics = function()
 {
-
+  for(var i = 0; i < this.models.length; i++)
+  {
+    this.models[i].updatePhysics();
+  }
 }
 
 Scene.prototype.addModel = function(model)
@@ -135,9 +170,10 @@ Scene.prototype.updateGraphics = function()
   for(var i = 0; i < this.models.length; i++)
   {
     var model = this.models[i];
-    for(var j = 0; j < model.mesh.length; j++)
+    var mesh = model.getGlobalMesh();
+    for(var j = 0; j < mesh.length; j++)
     {
-      this.renderTriangle(model.mesh[j]);
+      this.renderTriangle(mesh[j]);
     }
   }
 }

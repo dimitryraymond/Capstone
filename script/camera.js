@@ -47,3 +47,13 @@ Camera.prototype.slideDown = function()
 {
   this.position.y -= this.sensitivity * 10;
 }
+
+Camera.prototype.turnRight = function()
+{
+  this.angle = rotate(this.angle, new THREE.Vector3(0, 1, 0), -this.sensitivity / 10 * Math.PI);
+}
+
+Camera.prototype.turnLeft = function()
+{
+  this.angle = rotate(this.angle, new THREE.Vector3(0, 1, 0), this.sensitivity / 10 * Math.PI);
+}

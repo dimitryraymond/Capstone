@@ -16,10 +16,28 @@ function Model()
   this.torque = 0; //this gets set and then 'consumed'
 }
 
-Model.prototype.update = function () {
+Model.prototype.updatePhysics = function () {
+  this.position.add(this.velocity);
 };
 
 Model.prototype.computeConvextPolygon = function()
 {
 
+}
+
+Model.prototype.getGlobalMesh = function()
+{
+  var globalMesh = [];
+  for(var i = 0; i < this.mesh.length; i++)
+  {
+    var tri = new Triangle();
+    for(var j = 0; j < 3; j++)
+    {
+      var vertex = this.mesh[i].vertices[j].clone().add(this.position);
+      tri.vertices[j] = vertex;
+    }
+    globalMesh.push(tri);
+  }
+
+  return globalMesh;
 }

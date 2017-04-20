@@ -3,6 +3,7 @@ var Meshes = {
   {
     //easier to do calculations if i offset the position to center
     //this makes position equal to botLeftFar corner
+    position = position.clone(); //get rid of reference
     position.x -= (size.x / 2);
     position.y -= (size.y / 2);
     position.z -= (size.z / 2);
