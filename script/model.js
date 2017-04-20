@@ -10,7 +10,7 @@ function Model()
   this.mass = 0;
   this.force = 0; //this gets set and then 'consumed'
 
-  this.angle = new THREE.Vector3(0,0,1);
+  this.angle = new THREE.Vector3(0 ,0 ,1);
   this.angularVelocity = new THREE.Vector3(0, 0, 0);
   this.innertia = 0; //TODO: compute this using a callback probably
   this.torque = 0; //this gets set and then 'consumed'
