@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8" />
+  <title>Capstone Engine</title>
+  <link rel="stylesheet" type="text/css" href="css/main.css" />
+</head>
+<body>
+  <canvas id="myScene" width="1000" height="500">no canvas?</canvas>
+  <script src="script/three.min.js"></script>
+  <script src="script/model.js" ></script>
+  <script src="script/meshTemplates.js" ></script>
+  <script src="script/triangle.js"></script>
+  <script src="script/camera.js" ></script>
+  <script src="script/scene.js"></script>
+  <script>
+    var myScene = new Scene('myScene');
+    var model = new Model();
+    myScene.addModel(model);
+    myScene.play();
+
+    var rotate = function(vector, around, angle)
+    {
+      //vector and around: THREE.Vector3
+      var quaternion = new THREE.Quaternion().setFromAxisAngle(around.normalize(), angle);
+      return vector.clone().applyQuaternion(quaternion);
+    }
+
+//<!-- <canvas id='myScene' width="1000" height="500">no canvas?</canvas> -->
+    // var myScene = new Scene('myScene');
+    // var models = [];
+    // for(var x = -4; x < 4; x++){
+    //   for(var y = -4; y < 4; y++){
+    //     for(var z = -4; z < 4; z++){
+    //       color = (x + y + z) % 2 == 0 ? 'gray' : 'black';
+    //       var boxPolygons = PolygonTemplates.box(0, 0, 0, 100, 100, 100, color);
+    //       var box = new Model(boxPolygons, new Vertex(x * 100, y * 100, z * 100));
+    //       box.IsActive = true;
+    //       models.push(box);
+    //     }
+    //   }
+    // }
+    // function render(){
+    //   myScene.clearScreen();
+    //   for(var i = 0; i < models.length; i++){
+    //     myScene.renderModel(models[i]);
+    //   }
+    // }
+    // render(); //this keeps the screen from flashing/loading
+    // var fps = myScene.framerate;
+    // var update = function() {
+    //   myScene.camera.updateMotion(myScene);
+    //   for(var i = 0; i < models.length; i++){
+    //     models[i].update(fps);
+    //   }
+    //   render();
+    // }
+    // setInterval(update, 1000 / fps);
+  </script>
+</body>
+</html>
