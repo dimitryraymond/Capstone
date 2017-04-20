@@ -19,6 +19,7 @@ function Scene(canvasId)
 
   this.initKeyboard();
   this.initMouse();
+  this.logged = false;
 }
 
 Scene.prototype.initKeyboard = function()
@@ -71,6 +72,7 @@ Scene.prototype.update = function()
   this.updateInput();
   this.updatePhysics();
   this.updateGraphics();
+  this.logged = false;
 }
 
 Scene.prototype.updateInput = function()
@@ -117,18 +119,24 @@ Scene.prototype.play = function()
 
 Scene.prototype.offsetToCamera = function(vertex)
 {
+  //position offset
   t3DVertex = new THREE.Vector3(0, 0, 0);
   t3DVertex.x = vertex.x - this.camera.position.x;
   t3DVertex.y = vertex.y - this.camera.position.y;
   t3DVertex.z = vertex.z - this.camera.position.z;
+
+  var angle = new THREE.Vector3(0, 0, -1).angleTo(this.camera.angle);
+  var dot = new THREE.Vector3(0, 0, -1).dot(this.camera.angle);
+
+  var quaternion = new THREE.Quaternion().setFromUnitVectors(this.camera.angle, new THREE.Vector3(0, 0, -1));
+
+  t3DVertex.applyQuaternion(quaternion);
 
   return t3DVertex;
 }
 
 Scene.prototype.vertexTo2D = function(vertex)
 {
-  vertex = this.offsetToCamera(vertex);
-
   //depth perception
   tVertex = new THREE.Vector2(0, 0);
   tVertex.x = vertex.z == 0 ? vertex.x : (vertex.x * this.camera.zoom) / (-vertex.z + this.camera.zoom);
@@ -142,7 +150,13 @@ Scene.prototype.get2DVertices = function(triangle)
   var vertices = [];
   for(var i = 0; i < triangle.vertices.length; i++)
   {
-    vertices.push(this.vertexTo2D(triangle.vertices[i]));
+    var vertex = triangle.vertices[i];
+    vertex = this.offsetToCamera(vertex);
+
+    if(vertex.z > 0)
+      return;
+
+    vertices.push(this.vertexTo2D(vertex));
   }
 
   return vertices;
@@ -150,7 +164,12 @@ Scene.prototype.get2DVertices = function(triangle)
 
 Scene.prototype.renderTriangle = function(triangle)
 {
+
   var vertices = this.get2DVertices(triangle);
+
+  //if return undefined then it's not renderable Triangle
+  if(!vertices)
+    return;
 
   this.ctx.beginPath();
   this.ctx.moveTo(vertices[0].x, -vertices[0].y); //* -1 because y is inverted in 2D context

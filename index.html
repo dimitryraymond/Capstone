@@ -22,13 +22,13 @@
 
     for(var i = 0; i < 5; i++)
     {
-      for(var j = 0; j < 5; j++)
+      // for(var j = 0; j < 5; j++)
       {
         for(var k = 0; k < 5; k++)
         {
           var position = new THREE.Vector3();
           position.x = (i - 2) * 50;
-          position.y = (j - 2) * 50;
+          position.y = -275; //|| (j - 2) * 50;
           position.z = (k - 2) * 50;
           Meshes.addBox(model.mesh, position, new THREE.Vector3(50, 50, 50));
         }

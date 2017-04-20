@@ -50,10 +50,10 @@ Camera.prototype.slideDown = function()
 
 Camera.prototype.turnRight = function()
 {
-  this.angle = rotate(this.angle, new THREE.Vector3(0, 1, 0), -this.sensitivity / 10 * Math.PI);
+  this.angle = rotate(this.angle, new THREE.Vector3(0, 1, 0), -this.sensitivity / 40 * Math.PI);
 }
 
 Camera.prototype.turnLeft = function()
 {
-  this.angle = rotate(this.angle, new THREE.Vector3(0, 1, 0), this.sensitivity / 10 * Math.PI);
+  this.angle = rotate(this.angle, new THREE.Vector3(0, 1, 0), this.sensitivity / 40 * Math.PI);
 }

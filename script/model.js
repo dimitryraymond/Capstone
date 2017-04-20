@@ -20,7 +20,7 @@ Model.prototype.updatePhysics = function () {
   this.position.add(this.velocity);
 };
 
-Model.prototype.computeConvextPolygon = function()
+Model.prototype.computeConvexPolygon = function()
 {
 
 }
