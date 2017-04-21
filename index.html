@@ -20,6 +20,7 @@
     var model = new Model();
     model.position.y = -250;
     model.position.z = -500;
+    model.position.x = -500;
     myScene.addModel(model);
 
     for(var i = 0; i < 5; i++)
@@ -38,6 +39,7 @@
     }
 
     var cylinder = new Model();
+    cylinder.position = new THREE.Vector3(300, 0, -500);
     myScene.addModel(cylinder);
     Meshes.addCylinder(cylinder.mesh);
     Meshes.addCylinder(cylinder.mesh, new THREE.Vector3(300, 0, 0));

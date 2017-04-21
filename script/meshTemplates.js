@@ -107,5 +107,31 @@ var Meshes = {
     }
 
     //walk them down the cylinder path
+  },
+
+  addCircle: function(target, startPoint, radius, around, n)
+  {
+    var circlePoints = [];
+    var firstPoint = startPoint;
+    circlePoints.push(firstPoint);
+
+    //define the perimeter points
+    var rad = Math.PI * 2 / n;
+    for(var i = 0; i < n - 1; i++)
+    {
+      var nextPoint = rotate(circlePoints[i], around, rad);
+      circlePoints.push(nextPoint);
+    }
+
+    //use the perimeter points to create a circumference of triangles
+    for(var i = 0; i < n; i++)
+    {
+      var first = circlePoints[i].clone();
+      var second = circlePoints[(i + 1) % 16].clone();
+      var third = first.clone();
+
+      var tri = new Triangle([first, second, third]);
+      target.push(tri);
+    }
   }
 }

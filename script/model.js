@@ -49,9 +49,9 @@ Model.prototype.updateBounds = function()
 
 Model.prototype.updateBoundingMesh = function()
 {
-  createCircle(this.boundingMesh, new THREE.Vector3(this.boundingRadius, 0, 0), this.boundingRadius, new THREE.Vector3(0, 1, 0), 16);
-  createCircle(this.boundingMesh, new THREE.Vector3(0, 0, this.boundingRadius), this.boundingRadius, new THREE.Vector3(1, 0, 0), 16);
-  createCircle(this.boundingMesh, new THREE.Vector3(this.boundingRadius, 0, 0), this.boundingRadius, new THREE.Vector3(0, 0, 1), 16);
+  Meshes.addCircle(this.boundingMesh, new THREE.Vector3(this.boundingRadius, 0, 0), this.boundingRadius, new THREE.Vector3(0, 1, 0), 16);
+  Meshes.addCircle(this.boundingMesh, new THREE.Vector3(0, 0, this.boundingRadius), this.boundingRadius, new THREE.Vector3(1, 0, 0), 16);
+  Meshes.addCircle(this.boundingMesh, new THREE.Vector3(this.boundingRadius, 0, 0), this.boundingRadius, new THREE.Vector3(0, 0, 1), 16);
 }
 
 Model.prototype.updatePhysics = function () {
