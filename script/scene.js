@@ -77,6 +77,7 @@ Scene.prototype.update = function()
 
 Scene.prototype.updateInput = function()
 {
+  //camera walking
   if(this.keysDown[key.a])
     this.camera.slideLeft();
   if(this.keysDown[key.d])
@@ -90,10 +91,22 @@ Scene.prototype.updateInput = function()
   if(this.keysDown[key.q])
     this.camera.slideDown();
 
+  //camera turning
   if(this.mouseCoords.x < 100)
     this.camera.turnLeft();
   else if(this.mouseCoords.x > 900)
     this.camera.turnRight();
+
+  //misc
+  if(this.keysDown[key.r])
+    this.models[0].angularVelocity = new THREE.Vector3();
+
+  if(this.keysDown[key.x])
+    this.models[0].angularVelocity.x += .1;
+  if(this.keysDown[key.c])
+    this.models[0].angularVelocity.y += .1;
+  if(this.keysDown[key.v])
+    this.models[0].angularVelocity.z += .1;
 }
 
 Scene.prototype.updatePhysics = function()

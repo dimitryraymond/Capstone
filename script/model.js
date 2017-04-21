@@ -8,26 +8,40 @@ function Model()
   this.position = new THREE.Vector3(0, 0, 0);
   this.velocity = new THREE.Vector3(0, 0, 0);
   this.acceleration = new THREE.Vector3(0, 0, 0);
-  this.mass = 0;
-  this.force = 0; //this gets set and then 'consumed'
+  this.mass = 100;
+  this.force = new THREE.Vector3(0, 0, 0); //this gets set and then 'consumed'
 
   this.angle = new THREE.Vector3(0 ,0 ,1);
   this.quaternion = new THREE.Quaternion();
   this.angularVelocity = new THREE.Vector3(0, 0, 0);
+  this.cummAngularVelocity = new THREE.Vector3();
   this.innertia = 0; //TODO: compute this using a callback probably
   this.torque = 0; //this gets set and then 'consumed'
+
+  this.useGravity = false;
 }
 
 Model.prototype.updatePhysics = function () {
+  //apply forces
+  this.acceleration = this.force.divideScalar(this.mass);
+  this.velocity.add(this.acceleration);
   this.position.add(this.velocity);
 
+  //reset the force
+  this.force = new THREE.Vector3();
+  this.acceleration = new THREE.Vector3();
+
+  //TODO: figure out innertia implementation
+  //apply angularVelocity
   if(!isNullVector(this.angularVelocity))
   {
+    this.cummAngularVelocity.add(this.angularVelocity);
+
     var magnitude = this.angularVelocity.distanceTo(new THREE.Vector3()) * Math.PI / 30 / 2 //30 for fps
     quaternion = new THREE.Quaternion().setFromAxisAngle(this.angularVelocity.clone().normalize(), magnitude);
     this.angle.applyQuaternion(quaternion);
 
-    this.quaternion = (new THREE.Quaternion()).setFromUnitVectors(new THREE.Vector3(0, 0, 1), this.angle);
+    this.quaternion.multiply(quaternion);
   }
 };
 
