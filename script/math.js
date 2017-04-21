@@ -17,7 +17,7 @@ var triangleIsClockwise = function(vertices, camera)
 
   var cameraVector = a.clone().sub(camera.position);
 
-  return a.cross(b).dot(cameraVector) > 0 || true;
+  return a.cross(b).dot(cameraVector) > -.1 || true;
 }
 
 var mightBeColliding = function(model1, model2)
