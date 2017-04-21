@@ -146,6 +146,21 @@ Scene.prototype.updatePhysics = function()
   {
     this.models[i].updatePhysics();
   }
+  //detect collisions
+  for(var i = 0; i < this.models.length; i++)
+  {
+    for(var j = i + 1; j < this.models.length; j++)
+    {
+      var maybeColliding = mightBeColliding(this.models[i], this.models[j]);
+      //do pixel perfect collision detection
+      if(maybeColliding)
+      {
+        //bounding hull
+        //check bounding hulls
+      }
+    }
+  }
+  //solve constraints
 }
 
 Scene.prototype.addModel = function(model)
