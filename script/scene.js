@@ -203,7 +203,8 @@ Scene.prototype.vertexTo2D = function(vertex)
 
 Scene.prototype.get2DVertices = function(triangle)
 {
-  var vertices = [];
+  var vertices2D = [];
+  var vertices3D = [];
   for(var i = 0; i < triangle.vertices.length; i++)
   {
     var vertex = triangle.vertices[i];
@@ -212,10 +213,17 @@ Scene.prototype.get2DVertices = function(triangle)
     if(vertex.z > 0)
       return;
 
-    vertices.push(this.vertexTo2D(vertex));
+    vertices2D.push(this.vertexTo2D(vertex));
+    vertices3D.push(vertex);
   }
 
-  return vertices;
+  if(!triangle.forceDisplay)
+  {
+    if(!triangleIsClockwise(vertices3D, this.camera))
+    return;
+  }
+
+  return vertices2D;
 }
 
 Scene.prototype.renderTriangle = function(triangle, color)

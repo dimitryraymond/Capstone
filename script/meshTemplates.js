@@ -131,6 +131,7 @@ var Meshes = {
       var third = first.clone();
 
       var tri = new Triangle([first, second, third]);
+      tri.forceDisplay = true;
       target.push(tri);
     }
   }

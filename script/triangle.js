@@ -4,7 +4,7 @@ function Triangle(vertices, color)
   this.vertices(vertices);
 
   this.color = color ? color : 'black';
-
+  this.forceDisplay = false;
 }
 
 Triangle.prototype.vertices = function(vertices)
