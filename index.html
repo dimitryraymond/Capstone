@@ -18,6 +18,8 @@
   <script>
     var myScene = new Scene('myScene');
     var model = new Model();
+    model.position.y = -250;
+    model.position.z = -500;
     myScene.addModel(model);
 
     for(var i = 0; i < 5; i++)
@@ -28,7 +30,7 @@
         {
           var position = new THREE.Vector3();
           position.x = (i - 2) * 50;
-          position.y = -275; //|| (j - 2) * 50;
+          position.y = 0; //|| (j - 2) * 50;
           position.z = (k - 2) * 50;
           Meshes.addBox(model.mesh, position, new THREE.Vector3(50, 50, 50));
         }

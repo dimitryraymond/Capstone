@@ -125,9 +125,6 @@ Scene.prototype.offsetToCamera = function(vertex)
   t3DVertex.y = vertex.y - this.camera.position.y;
   t3DVertex.z = vertex.z - this.camera.position.z;
 
-  var angle = new THREE.Vector3(0, 0, -1).angleTo(this.camera.angle);
-  var dot = new THREE.Vector3(0, 0, -1).dot(this.camera.angle);
-
   var quaternion = new THREE.Quaternion().setFromUnitVectors(this.camera.angle, new THREE.Vector3(0, 0, -1));
 
   t3DVertex.applyQuaternion(quaternion);

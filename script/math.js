@@ -4,3 +4,8 @@ var rotate = function(vector, around, angle)
   var quaternion = new THREE.Quaternion().setFromAxisAngle(around.normalize(), angle);
   return vector.clone().applyQuaternion(quaternion);
 }
+
+var isNullVector = function(vector)
+{
+  return vector.x == 0 && vector.y == 0 && vector.z == 0
+}

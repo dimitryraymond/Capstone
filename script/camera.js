@@ -16,36 +16,51 @@ Camera.prototype.lookAt = function(vector)
   }
 }
 
+Camera.prototype.shiftHorizontal = function(distance)
+{
+  this.position.x -= (this.angle.z * distance);
+  this.position.z += (this.angle.x * distance);
+}
+
+Camera.prototype.shiftFrontToBack = function(distance)
+{
+  this.position.x += (this.angle.x * distance);
+  this.position.z += (this.angle.z * distance);
+}
+
+Camera.prototype.shiftVertical = function(distance)
+{
+  this.position.y += distance;
+}
+
 Camera.prototype.slideRight = function()
 {
-  this.position.x += this.sensitivity * 10;
-  // this.position.x += (vector.z * -x);
-  // this.position.z += (vector.x * -x);
+  this.shiftHorizontal(this.sensitivity * 10)
 }
 
 Camera.prototype.slideLeft = function()
 {
-  this.position.x -= this.sensitivity * 10;
+  this.shiftHorizontal(this.sensitivity * -10);
 }
 
 Camera.prototype.slideForward = function()
 {
-  this.position.z -= this.sensitivity * 10;
+  this.shiftFrontToBack(this.sensitivity * 10);
 }
 
 Camera.prototype.slideBack = function()
 {
-  this.position.z += this.sensitivity * 10;
+  this.shiftFrontToBack(this.sensitivity * -10);
 }
 
 Camera.prototype.slideUp = function()
 {
-  this.position.y += this.sensitivity * 10;
+  this.shiftVertical(this.sensitivity * 10);
 }
 
 Camera.prototype.slideDown = function()
 {
-  this.position.y -= this.sensitivity * 10;
+  this.shiftVertical(this.sensitivity * -10);
 }
 
 Camera.prototype.turnRight = function()
