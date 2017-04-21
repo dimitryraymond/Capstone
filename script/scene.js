@@ -11,8 +11,8 @@ function Scene(canvasId)
   this.defaultStrokeStyle = 'black';
   this.ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
   this.ctx.font = "30px Arial";
-  this.ctx.fillStyle = this.defaultFillStyle;
-  this.ctx.strokeStyle = this.defaultStrokeStyle;
+  // this.ctx.fillStyle = this.defaultFillStyle;
+  // this.ctx.strokeStyle = this.defaultStrokeStyle;
   this.ctx.lineWidth = 1;
 
   //keyboard
@@ -20,6 +20,7 @@ function Scene(canvasId)
   this.initKeyboard();
   this.initMouse();
   this.logged = false;
+  this.fill = false;
 }
 
 Scene.prototype.initKeyboard = function()
@@ -32,6 +33,11 @@ Scene.prototype.initKeyboard = function()
 
   document.onkeydown = function(e){
     self.keysDown[e.keyCode] = true;
+
+    if(e.keyCode == key.f)
+    {
+      self.fill = !self.fill;
+    }
   }
   document.onkeyup = function(e){
     self.keysDown[e.keyCode] = false;
@@ -69,10 +75,19 @@ Scene.prototype.clearScreen = function()
 
 Scene.prototype.update = function()
 {
+  this.updateModels();
   this.updateInput();
   this.updatePhysics();
   this.updateGraphics();
   this.logged = false;
+}
+
+Scene.prototype.updateModels = function()
+{
+  for(var i = 0; i < this.models.length; i++)
+  {
+    this.models[i].update();
+  }
 }
 
 Scene.prototype.updateInput = function()
@@ -103,14 +118,26 @@ Scene.prototype.updateInput = function()
 
   //misc
   if(this.keysDown[key.r])
-    this.models[0].angularVelocity = new THREE.Vector3();
+  {
+    for(var i = 0; i < this.models.length; i++)
+      this.models[i].angularVelocity = new THREE.Vector3();
+  }
 
   if(this.keysDown[key.x])
-    this.models[0].angularVelocity.x += .1;
+  {
+    for(var i = 0; i < this.models.length; i++)
+      this.models[i].angularVelocity.x += .1;
+  }
   if(this.keysDown[key.c])
-    this.models[0].angularVelocity.y += .1;
+  {
+    for(var i = 0; i < this.models.length; i++)
+      this.models[i].angularVelocity.y += .1;
+  }
   if(this.keysDown[key.v])
-    this.models[0].angularVelocity.z += .1;
+  {
+    for(var i = 0; i < this.models.length; i++)
+      this.models[i].angularVelocity.z += .1;
+  }
 }
 
 Scene.prototype.updatePhysics = function()
@@ -176,7 +203,7 @@ Scene.prototype.get2DVertices = function(triangle)
   return vertices;
 }
 
-Scene.prototype.renderTriangle = function(triangle)
+Scene.prototype.renderTriangle = function(triangle, color)
 {
 
   var vertices = this.get2DVertices(triangle);
@@ -191,9 +218,25 @@ Scene.prototype.renderTriangle = function(triangle)
   this.ctx.lineTo(vertices[2].x, -vertices[2].y);
   this.ctx.closePath();
 
+  if(this.fill)
+  {
+    this.ctx.fillStyle = "rgba(0, 0, 0, 1)";
+    this.ctx.strokeStyle = "rgba(0, 0, 0, 0)";
+  }
+  else
+  {
+    this.ctx.fillStyle = "rgba(0, 0, 0, 0)";
+    this.ctx.strokeStyle = "rgba(0, 0, 0, 1)";
+  }
+
+  if(color)
+  {
+    this.ctx.fillStyle = color;
+    this.ctx.strokeStyle = color;
+  }
+
+  this.ctx.fill();
   this.ctx.stroke();
-  // this.ctx.fillStyle = 'black';
-  // this.ctx.fill();
 }
 
 Scene.prototype.updateGraphics = function()
@@ -203,10 +246,17 @@ Scene.prototype.updateGraphics = function()
   for(var i = 0; i < this.models.length; i++)
   {
     var model = this.models[i];
-    var mesh = model.getGlobalMesh();
+    var mesh = [];
+    var boundsMesh = [];
+    model.getGlobalMesh(mesh, boundsMesh); //pass by reference
     for(var j = 0; j < mesh.length; j++)
     {
       this.renderTriangle(mesh[j]);
+    }
+
+    for(var j = 0; j < boundsMesh.length; j++)
+    {
+      this.renderTriangle(boundsMesh[j], 'red');
     }
   }
 }

@@ -1,5 +1,5 @@
 function Camera(){
-  this.position = new THREE.Vector3(0, 0, 0);
+  this.position = new THREE.Vector3(0, 0, 300);
   this.angle = new THREE.Vector3(0, 0, -1);
   this.zoom = 600;
   this.sensitivity = 1;
@@ -35,32 +35,32 @@ Camera.prototype.shiftVertical = function(distance)
 
 Camera.prototype.slideRight = function()
 {
-  this.shiftHorizontal(this.sensitivity * 10)
+  this.shiftHorizontal(this.sensitivity * 20)
 }
 
 Camera.prototype.slideLeft = function()
 {
-  this.shiftHorizontal(this.sensitivity * -10);
+  this.shiftHorizontal(this.sensitivity * -20);
 }
 
 Camera.prototype.slideForward = function()
 {
-  this.shiftFrontToBack(this.sensitivity * 10);
+  this.shiftFrontToBack(this.sensitivity * 20);
 }
 
 Camera.prototype.slideBack = function()
 {
-  this.shiftFrontToBack(this.sensitivity * -10);
+  this.shiftFrontToBack(this.sensitivity * -20);
 }
 
 Camera.prototype.slideUp = function()
 {
-  this.shiftVertical(this.sensitivity * 10);
+  this.shiftVertical(this.sensitivity * 20);
 }
 
 Camera.prototype.slideDown = function()
 {
-  this.shiftVertical(this.sensitivity * -10);
+  this.shiftVertical(this.sensitivity * -20);
 }
 
 Camera.prototype.turnRight = function()

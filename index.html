@@ -36,6 +36,12 @@
         }
       }
     }
+
+    var cylinder = new Model();
+    myScene.addModel(cylinder);
+    Meshes.addCylinder(cylinder.mesh);
+    Meshes.addCylinder(cylinder.mesh, new THREE.Vector3(300, 0, 0));
+
     myScene.play();
 
   </script>
