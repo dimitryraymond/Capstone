@@ -72,3 +72,13 @@ Camera.prototype.turnLeft = function()
 {
   this.angle = rotate(this.angle, new THREE.Vector3(0, 1, 0), this.sensitivity / 40 * Math.PI);
 }
+
+Camera.prototype.turnUp = function()
+{
+  // this.angle = rotate(this.angle, new THREE.Vector3(1, 0, 0), this.sensitivity / 40 * Math.PI)
+}
+
+Camera.prototype.turnDown = function()
+{
+  // this.angle = rotate(this.angle, new THREE.Vector3(1, 0, 0), this.sensitivity / 40 * Math.PI * -1);
+}

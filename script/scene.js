@@ -43,7 +43,7 @@ Scene.prototype.initMouse = function()
   //mouse
   this.mouseCoords = {
     x: this.canvas.width / 2,
-    y: this.canvas.width / 2
+    y: this.canvas.height / 2
   }
 
   var canvasBounds = this.canvas.getBoundingClientRect();
@@ -96,6 +96,10 @@ Scene.prototype.updateInput = function()
     this.camera.turnLeft();
   else if(this.mouseCoords.x > 900)
     this.camera.turnRight();
+  if(this.mouseCoords.y < 50)
+    this.camera.turnUp();
+  else if(this.mouseCoords.y > 450)
+    this.camera.turnDown();
 
   //misc
   if(this.keysDown[key.r])
