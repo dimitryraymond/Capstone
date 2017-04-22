@@ -38,5 +38,5 @@ Triangle.prototype.isClockwise = function(camera)
   var normal = this.getNormal();
   var cameraVector = normal.point.clone().sub(camera.position);
 
-  return normal.direction.clone().dot(cameraVector) <= .2;
+  return normal.direction.clone().dot(cameraVector) <= .2; //.2 because poormans way of dealing with close objects
 }
