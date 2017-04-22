@@ -42,7 +42,7 @@
     cylinder.position = new THREE.Vector3(300, 0, -500);
     // cylinder.velocity.x -= 5;
     myScene.addModel(cylinder);
-    Meshes.addCylinder(cylinder.mesh);
+    Meshes.addCylinder(cylinder.mesh, undefined, new THREE.Vector3(300, 300, 300), 6);
     Meshes.addCylinder(cylinder.mesh, new THREE.Vector3(300, 0, 0));
 
     myScene.play();

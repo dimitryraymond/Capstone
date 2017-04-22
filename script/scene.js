@@ -21,6 +21,7 @@ function Scene(canvasId)
   this.initMouse();
   this.logged = false;
   this.fill = false;
+  this.showDebug = true;
 }
 
 Scene.prototype.initKeyboard = function()
@@ -34,10 +35,13 @@ Scene.prototype.initKeyboard = function()
   document.onkeydown = function(e){
     self.keysDown[e.keyCode] = true;
 
+    //toggle fill display
     if(e.keyCode == key.f)
-    {
       self.fill = !self.fill;
-    }
+
+    //toggle debug display
+    if(e.keyCode == key.z)
+      self.showDebug = !self.showDebug;
   }
   document.onkeyup = function(e){
     self.keysDown[e.keyCode] = false;
@@ -208,7 +212,6 @@ Scene.prototype.get2DVertices = function(triangle)
   for(var i = 0; i < triangle.vertices.length; i++)
   {
     var vertex = triangle.vertices[i];
-    vertex = this.offsetToCamera(vertex);
 
     if(vertex.z > 0)
       return;
@@ -217,18 +220,21 @@ Scene.prototype.get2DVertices = function(triangle)
     vertices3D.push(vertex);
   }
 
-  if(!triangle.forceDisplay)
-  {
-    if(!triangleIsClockwise(vertices3D, this.camera))
-    return;
-  }
-
   return vertices2D;
 }
 
 Scene.prototype.renderTriangle = function(triangle, color)
 {
+  if(!triangle.isDebug && !triangle.isClockwise(this.camera))
+    return;
 
+  if(triangle.isDebug && !this.showDebug)
+    return;
+
+  for(var i = 0; i < 3; i++)
+  {
+    triangle.vertices[i] = this.offsetToCamera(triangle.vertices[i]);
+  }
   var vertices = this.get2DVertices(triangle);
 
   //if return undefined then it's not renderable Triangle
@@ -260,6 +266,22 @@ Scene.prototype.renderTriangle = function(triangle, color)
 
   this.ctx.fill();
   this.ctx.stroke();
+
+  //render normals
+  if(!triangle.isDebug && this.showDebug)
+  {
+    var normal = triangle.getNormal();
+    var point1 = this.vertexTo2D(normal.point);
+    var point2 = this.vertexTo2D(normal.point.add(normal.direction.normalize().multiplyScalar(20)));
+    // var point2 = this.vertexTo2D(normal.point.add(normal.direction));
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(point1.x, -point1.y);
+    this.ctx.lineTo(point2.x, -point2.y);
+    this.ctx.closePath();
+    this.ctx.strokeStyle = 'blue';
+    this.ctx.stroke();
+  }
 }
 
 Scene.prototype.updateGraphics = function()

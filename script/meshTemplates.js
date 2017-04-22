@@ -40,14 +40,14 @@ var Meshes = {
     target.push(new Triangle([botLeftFar.clone(), botRightNear.clone(), botRightFar.clone()]));
   },
 
-  addCylinder: function(target, position, size, color, n)
+  addCylinder: function(target, position, size, n, color)
   {
     if(!target)
       throw new Error("Target mesh is requred.");
     position = position || new THREE.Vector3();
     size = size || new THREE.Vector3(100, 100, 100);
     color = color || 'black';
-    n = n || 16;
+    n = n || 8;
 
     //figure out the n points of cross section
     var radius = size.x / 2;
@@ -131,7 +131,7 @@ var Meshes = {
       var third = first.clone();
 
       var tri = new Triangle([first, second, third]);
-      tri.forceDisplay = true;
+      tri.isDebug = true;
       target.push(tri);
     }
   }

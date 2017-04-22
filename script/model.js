@@ -87,7 +87,7 @@ Model.prototype.getGlobalMesh = function(targetMesh, targetBoundsMesh)
   for(var i = 0; i < this.mesh.length; i++)
   {
     var tri = new Triangle();
-    tri.forceDisplay = this.mesh[i].forceDisplay;
+    tri.isDebug = this.mesh[i].isDebug;
     for(var j = 0; j < 3; j++)
     {
       var vertex = this.mesh[i].vertices[j].clone(); //original vertex
@@ -101,7 +101,7 @@ Model.prototype.getGlobalMesh = function(targetMesh, targetBoundsMesh)
   for(var i = 0; i < this.boundingMesh.length; i++)
   {
     var tri = new Triangle();
-    tri.forceDisplay = this.boundingMesh[i].forceDisplay;
+    tri.isDebug = this.boundingMesh[i].isDebug;
     for(var j = 0; j < 3; j++)
     {
       var vertex = this.boundingMesh[i].vertices[j].clone(); //original vertex
