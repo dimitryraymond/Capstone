@@ -15,3 +15,8 @@ var mightBeColliding = function(model1, model2)
   var distance = model1.position.distanceTo(model2.position);
   return distance < model1.boundingRadius + model2.boundingRadius
 }
+
+var getBoundingHull = function(target, mesh)
+{
+  
+}
