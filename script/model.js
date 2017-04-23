@@ -43,6 +43,7 @@ Model.prototype.updateBounds = function()
   }
 
   this.updateBoundingMesh();
+  this.updateConvexHull();
 
   this.lastCheckedMeshSize = this.mesh.length;
 }
@@ -52,6 +53,11 @@ Model.prototype.updateBoundingMesh = function()
   Meshes.addCircle(this.boundingMesh, new THREE.Vector3(this.boundingRadius, 0, 0), this.boundingRadius, new THREE.Vector3(0, 1, 0), 16);
   Meshes.addCircle(this.boundingMesh, new THREE.Vector3(0, 0, this.boundingRadius), this.boundingRadius, new THREE.Vector3(1, 0, 0), 16);
   Meshes.addCircle(this.boundingMesh, new THREE.Vector3(this.boundingRadius, 0, 0), this.boundingRadius, new THREE.Vector3(0, 0, 1), 16);
+}
+
+Model.prototype.updateConvexHull = function()
+{
+  this.convexMesh = QuickHull3D(this.mesh);
 }
 
 Model.prototype.updatePhysics = function () {
@@ -82,33 +88,39 @@ Model.prototype.computeConvexPolygon = function()
 
 }
 
-Model.prototype.getGlobalMesh = function(targetMesh, targetBoundsMesh)
+Model.prototype.getGlobalMesh = function(targetMesh, targetBoundsMesh, targetHullMesh)
 {
   for(var i = 0; i < this.mesh.length; i++)
   {
-    var tri = new Triangle();
-    tri.isDebug = this.mesh[i].isDebug;
+    var tri = this.mesh[i].clone();
     for(var j = 0; j < 3; j++)
     {
-      var vertex = this.mesh[i].vertices[j].clone(); //original vertex
-      vertex.applyQuaternion(this.quaternion);//apply rotation of model
-      vertex.add(this.position); //apply model location
-      tri.vertices[j] = vertex;
+      tri.vertices[j].applyQuaternion(this.quaternion);//apply rotation of model
+      tri.vertices[j].add(this.position);
     }
     targetMesh.push(tri);
   }
 
   for(var i = 0; i < this.boundingMesh.length; i++)
   {
-    var tri = new Triangle();
-    tri.isDebug = this.boundingMesh[i].isDebug;
+    var tri = this.boundingMesh[i].clone();
     for(var j = 0; j < 3; j++)
     {
-      var vertex = this.boundingMesh[i].vertices[j].clone(); //original vertex
-      vertex.applyQuaternion(this.quaternion);//apply rotation of model
-      vertex.add(this.position); //apply model location
-      tri.vertices[j] = vertex;
+      tri.vertices[j].applyQuaternion(this.quaternion);//apply rotation of model
+      tri.vertices[j].add(this.position);
     }
     targetBoundsMesh.push(tri);
   }
+
+  for(var i = 0; i < this.convexMesh.length; i++)
+  {
+    var tri = this.convexMesh[i].clone();
+    for(var j = 0; j < 3; j++)
+    {
+      tri.vertices[j].applyQuaternion(this.quaternion);//apply rotation of model
+      tri.vertices[j].add(this.position);
+    }
+    targetHullMesh.push(tri);
+  }
+
 }

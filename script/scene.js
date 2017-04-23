@@ -255,8 +255,16 @@ Scene.prototype.renderTriangle = function(triangle, color)
 
   if(color)
   {
-    this.ctx.fillStyle = color;
-    this.ctx.strokeStyle = color;
+    if(color.length == 2)
+    {
+      this.ctx.fillStyle = color[0];
+      this.ctx.strokeStyle = color[1];
+    }
+    else
+    {
+      this.ctx.fillStyle = color;
+      this.ctx.strokeStyle = color;
+    }
   }
 
   this.ctx.fill();
@@ -306,15 +314,16 @@ Scene.prototype.updateGraphics = function()
     var model = this.models[i];
     var mesh = [];
     var boundsMesh = [];
-    model.getGlobalMesh(mesh, boundsMesh); //pass by reference
+    var hullMesh = [];
+    model.getGlobalMesh(mesh, boundsMesh, hullMesh); //pass by reference
     //render actual model
     for(var j = 0; j < mesh.length; j++)
     {
       if(mesh[j].isClockwise(this.camera))
       {
         this.renderTriangle(mesh[j]);
-        if(this.showDebug)
-          this.renderNormal(mesh[j]);
+        // if(this.showDebug)
+        //   this.renderNormal(mesh[j]);
       }
     }
 
@@ -323,7 +332,13 @@ Scene.prototype.updateGraphics = function()
     {
       for(var j = 0; j < boundsMesh.length; j++)
       {
-        this.renderTriangle(boundsMesh[j], 'red');
+        // this.renderTriangle(boundsMesh[j], 'red');
+      }
+
+      for(var j = 0; j < hullMesh.length; j++)
+      {
+        this.renderTriangle(hullMesh[j], [undefined, 'green']);
+        this.renderNormal(hullMesh[j]);
       }
     }
 

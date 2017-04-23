@@ -44,7 +44,7 @@ Triangle.prototype.getNormal = function()
   point.z = this.vertices[0].z + this.vertices[1].z + this.vertices[2].z;
   point.z /= 3;
 
-  return { point: point, direction: b.cross(a) };
+  return { point: point, direction: b.cross(a).normalize() };
 }
 
 Triangle.prototype.isClockwise = function(camera)
@@ -58,4 +58,11 @@ Triangle.prototype.isClockwise = function(camera)
   var dotProduct = normal.direction.clone().normalize().dot(cameraVector.normalize());
 
   return dotProduct <= 0;
+}
+
+Triangle.prototype.flipNormal = function()
+{
+  var v3 = this.vertices[2];
+  this.vertices[2] = this.vertices[1];
+  this.vertices[1] = v3;
 }
