@@ -36,10 +36,12 @@ Triangle.prototype.getNormal = function()
 Triangle.prototype.isClockwise = function(camera)
 {
   var normal = this.getNormal();
-  var cameraVector = normal.point.clone().sub(camera.position);
+  //this is where the user's eyes are relative to screen (simulated by camera.zoom)
+  var viewPosition = camera.position.clone().sub(camera.angle.clone().multiplyScalar(camera.zoom));
+  var cameraVector = normal.point.clone().sub(viewPosition);
 
+  //normalize becasue this is between two equally sized vectors
   var dotProduct = normal.direction.clone().normalize().dot(cameraVector.normalize());
-  //.2 because poormans way of dealing with close objects
 
-  return dotProduct <= .2;
+  return dotProduct <= 0;
 }
