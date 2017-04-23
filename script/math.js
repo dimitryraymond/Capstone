@@ -16,7 +16,32 @@ var mightBeColliding = function(model1, model2)
   return distance < model1.boundingRadius + model2.boundingRadius
 }
 
-var getBoundingHull = function(target, mesh)
+//used to avoid duplicates
+//in the models' meshes, every corner touches 4 triangles
+//therefore 4 vertices share a common place in the mesh
+var collectionIncludesVector = function(collection, vector)
+{
+  for(var i = 0; i < collection.length; i++)
+  {
+    if(vector.equals(collection[i]))
+      return true;
+  }
+  return false;
+}
+
+var extractVertices = function(mesh)
+{
+  var vertices = [];
+  mesh.forEach(function(triangle){
+    triangle.vertices.forEach(function(vertex){
+      if(!collectionIncludesVector(vertices, vertex))
+        vertices.push(vertex.clone());
+    });
+  });
+
+  return vertices;
+}
+var getBoundingHull = function(target, vertices)
 {
   
 }

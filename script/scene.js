@@ -208,7 +208,6 @@ Scene.prototype.vertexTo2D = function(vertex)
 Scene.prototype.get2DVertices = function(triangle)
 {
   var vertices2D = [];
-  var vertices3D = [];
   for(var i = 0; i < triangle.vertices.length; i++)
   {
     var vertex = triangle.vertices[i];
@@ -217,19 +216,15 @@ Scene.prototype.get2DVertices = function(triangle)
       return;
 
     vertices2D.push(this.vertexTo2D(vertex));
-    vertices3D.push(vertex);
   }
 
   return vertices2D;
 }
 
+//renders a triangle, assumes you passin in a triangle based on global location (not local to model)
 Scene.prototype.renderTriangle = function(triangle, color)
 {
-  if(!triangle.isDebug && !triangle.isClockwise(this.camera))
-    return;
-
-  if(triangle.isDebug && !this.showDebug)
-    return;
+  triangle = triangle.clone(); //get rid of reference
 
   for(var i = 0; i < 3; i++)
   {
@@ -237,7 +232,7 @@ Scene.prototype.renderTriangle = function(triangle, color)
   }
   var vertices = this.get2DVertices(triangle);
 
-  //if return undefined then it's not renderable Triangle
+  //if return undefined then it's not a renderable Triangle (i.e. behind the camera)
   if(!vertices)
     return;
 
@@ -266,22 +261,40 @@ Scene.prototype.renderTriangle = function(triangle, color)
 
   this.ctx.fill();
   this.ctx.stroke();
+}
 
-  //render normals
-  if(!triangle.isDebug && this.showDebug)
+Scene.prototype.renderNormal = function(triangle)
+{
+  triangle = triangle.clone(); //get rid of reference
+
+  for(var i = 0; i < 3; i++)
   {
-    var normal = triangle.getNormal();
-    var point1 = this.vertexTo2D(normal.point);
-    var point2 = this.vertexTo2D(normal.point.add(normal.direction.normalize().multiplyScalar(20)));
-    // var point2 = this.vertexTo2D(normal.point.add(normal.direction));
-
-    this.ctx.beginPath();
-    this.ctx.moveTo(point1.x, -point1.y);
-    this.ctx.lineTo(point2.x, -point2.y);
-    this.ctx.closePath();
-    this.ctx.strokeStyle = 'blue';
-    this.ctx.stroke();
+    triangle.vertices[i] = this.offsetToCamera(triangle.vertices[i]);
+    if(triangle.vertices[i].z > 0)
+      return;
   }
+
+  var normal = triangle.getNormal();
+  var point1 = this.vertexTo2D(normal.point);
+  var point2 = this.vertexTo2D(normal.point.add(normal.direction.normalize().multiplyScalar(20)));
+
+  this.ctx.beginPath();
+  this.ctx.moveTo(point1.x, -point1.y);
+  this.ctx.lineTo(point2.x, -point2.y);
+  this.ctx.closePath();
+  this.ctx.strokeStyle = 'blue';
+  this.ctx.stroke();
+}
+
+Scene.prototype.renderVertex = function(vertex)
+{
+  var triangle = new Triangle();
+  var size = 5;
+  triangle.vertices[0] = vertex.clone().add(new THREE.Vector3(size, 0, -size));
+  triangle.vertices[1] = vertex.clone().add(new THREE.Vector3(0, size, size));
+  triangle.vertices[2] = vertex.clone().add(new THREE.Vector3(-size / 2, -size / 2, size));
+  triangle.isDebug = true;
+  this.renderTriangle(triangle, 'green');
 }
 
 Scene.prototype.updateGraphics = function()
@@ -294,14 +307,31 @@ Scene.prototype.updateGraphics = function()
     var mesh = [];
     var boundsMesh = [];
     model.getGlobalMesh(mesh, boundsMesh); //pass by reference
+    //render actual model
     for(var j = 0; j < mesh.length; j++)
     {
-      this.renderTriangle(mesh[j]);
+      if(mesh[j].isClockwise(this.camera))
+      {
+        this.renderTriangle(mesh[j]);
+        if(this.showDebug)
+          this.renderNormal(mesh[j]);
+      }
     }
 
-    for(var j = 0; j < boundsMesh.length; j++)
+    //render the bounding sphere around the model
+    if(this.showDebug)
     {
-      this.renderTriangle(boundsMesh[j], 'red');
+      for(var j = 0; j < boundsMesh.length; j++)
+      {
+        this.renderTriangle(boundsMesh[j], 'red');
+      }
     }
+
+    // render the vertices of the model
+    var vertices = extractVertices(mesh);
+    var self = this;
+    vertices.forEach(function(vertex){
+      self.renderVertex(vertex);
+    });
   }
 }

@@ -7,6 +7,20 @@ function Triangle(vertices, color)
   this.isDebug = false;
 }
 
+//deep copy constructor
+Triangle.prototype.clone = function()
+{
+  var myClone = new Triangle();
+  for(var i = 0; i < 3; i++)
+  {
+    myClone.vertices[i] = this.vertices[i].clone();
+  }
+  myClone.color = this.color;
+  myClone.isDebug = this.isDebug;
+
+  return myClone;
+}
+
 Triangle.prototype.vertices = function(vertices)
 {
   if(vertices.length == 3)
