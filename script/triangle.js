@@ -3,7 +3,7 @@ function Triangle(vertices, color)
   var vertices = vertices ? vertices : [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0)];
   this.vertices(vertices);
 
-  this.color = color ? color : 'black';
+  this.color = undefined;
   this.isDebug = false;
 }
 

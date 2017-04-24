@@ -58,7 +58,7 @@ var removeDuplicateVertices = function(vertices)
 }
 
 //Inspired by this: https://www.youtube.com/watch?v=Z58_Zsa6YTo
-var QuickHull3D = function(mesh)
+var QuickHull3D = function(mesh, targetVertices)
 {
   var remainingVertices = extractVertices(mesh);
   if(remainingVertices.length < 4)
@@ -93,22 +93,24 @@ var QuickHull3D = function(mesh)
     hull.push(nextTri)
   }
 
-  while(remainingVertices.length > 0)
+  if(remainingVertices.length > 0)
   {
     //1. starting triangle
     var index = getNextFace(hull, remainingVertices);
-    console.log(index);
     if(index !== undefined)
     {
       //2. create half-space partition, find furthest vertex
       var furthestVertexIndex = getFurthestVertex(hull[index], remainingVertices);
       var vertex = remainingVertices.splice(furthestVertexIndex, 1)[0];
+      // vertex = vertex.clone().color = 'red';
+      targetVertices.push(vertex);
       //3. find visible faces to that vertex
       var faceIndexes = getVisibleFaces(vertex, hull);
       //4. delete visible faces, determine horizontal ridge
-      var ridge = removeFaces(faceIndexes, hull);
+      var ridge = removeFaces(faceIndexes, hull); //TODO: change this back to remove instead of color red
+      // var ridge = sortClockwise(ridge, vertex)
       //5. connect furthest vertex with horizontal ridge
-      connectVertexToHull(hull, vertex, ridge);
+      // connectVertexToHull(hull, vertex, ridge);
     }
     else
     {
@@ -186,7 +188,8 @@ var removeFaces = function(faceIndexes, hull)
   var removedFaces = [];
   for(var i = faceIndexes.length - 1; i > -1; i--)
   {
-    removedFaces.push(hull.splice(i, 1)[0]);
+    // removedFaces.push(hull.splice(i, 1)[0]);
+    hull[i].color = 'rgba(255, 0, 0, .4)';
   }
 
   var removedVertices = extractVertices(removedFaces);
@@ -199,7 +202,53 @@ var removeFaces = function(faceIndexes, hull)
   }
 
   ridge = removeDuplicateVertices(ridge);
-  //TODO: sort the ridge in clockwise order
+
+  return ridge;
+}
+
+//
+var swap = function(someArray, index1, index2)
+{
+  var x = someArray[index2];
+  someArray[index2] = someArray[index1];
+  someArray[index1] = x;
+}
+
+var getCenter = function(vertices)
+{
+  var x = 0;
+  var y = 0;
+  var z = 0;
+  vertices.forEach(function(vertex){
+    x += vertex.x;
+    y += vertex.y;
+    z += vertex.z;
+  });
+  x /= vertices.length;
+  y /= vertices.length;
+  z /= vertices.length;
+
+  return new THREE.Vector3(x, y, z);
+}
+//use vertex as a robust reference point to calculate the normal
+var sortClockwise = function(ridge, vertex)
+{
+  var center = getCenter(ridge);
+  var normal = center.clone().sub(vertex).normalize();
+  //simple bubble sort
+  for(var i = 0; i < ridge.length; i++)
+  {
+    for(var j = 0; j < ridge.length; j++)
+    {
+      if(i != j)
+      {
+        var cross = ridge[i].clone().sub(center).cross(ridge[j].clone().sub(center));
+        var dot = normal.dot(cross);
+        if(dot < 0)
+          swap(ridge, i, j);
+      }
+    }
+  }
   return ridge;
 }
 

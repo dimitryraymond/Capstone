@@ -302,7 +302,7 @@ Scene.prototype.renderVertex = function(vertex)
   triangle.vertices[1] = vertex.clone().add(new THREE.Vector3(0, size, size));
   triangle.vertices[2] = vertex.clone().add(new THREE.Vector3(-size / 2, -size / 2, size));
   triangle.isDebug = true;
-  this.renderTriangle(triangle, 'green');
+  this.renderTriangle(triangle, vertex.color || 'green');
 }
 
 Scene.prototype.updateGraphics = function()
@@ -315,7 +315,8 @@ Scene.prototype.updateGraphics = function()
     var mesh = [];
     var boundsMesh = [];
     var hullMesh = [];
-    model.getGlobalMesh(mesh, boundsMesh, hullMesh); //pass by reference
+    var debugVertices = [];
+    model.getGlobalMesh(mesh, boundsMesh, hullMesh, debugVertices); //pass by reference
     //render actual model
     for(var j = 0; j < mesh.length; j++)
     {
@@ -337,16 +338,21 @@ Scene.prototype.updateGraphics = function()
 
       for(var j = 0; j < hullMesh.length; j++)
       {
-        this.renderTriangle(hullMesh[j], ['rgba(0, 255, 0, .4)', 'green']);
+        this.renderTriangle(hullMesh[j], [hullMesh[j].color || 'rgba(0, 255, 0, .4)', 'blue']);
         this.renderNormal(hullMesh[j]);
+      }
+
+      for(var j = 0; j < debugVertices.length; j++)
+      {
+        this.renderVertex(debugVertices[j]);
       }
     }
 
     // render the vertices of the model
-    var vertices = extractVertices(mesh);
-    var self = this;
-    vertices.forEach(function(vertex){
-      self.renderVertex(vertex);
-    });
+    // var vertices = extractVertices(mesh);
+    // var self = this;
+    // vertices.forEach(function(vertex){
+    //   self.renderVertex(vertex);
+    // });
   }
 }
