@@ -337,7 +337,7 @@ Scene.prototype.updateGraphics = function()
 
       for(var j = 0; j < hullMesh.length; j++)
       {
-        this.renderTriangle(hullMesh[j], [undefined, 'green']);
+        this.renderTriangle(hullMesh[j], ['rgba(0, 255, 0, .4)', 'green']);
         this.renderNormal(hullMesh[j]);
       }
     }

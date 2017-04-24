@@ -45,20 +45,32 @@ var extractVertices = function(mesh)
 
   return vertices;
 }
+
+var removeDuplicateVertices = function(vertices)
+{
+  var newVertices = [];
+  vertices.forEach(function(vertex){
+    if(!collectionIncludesVector(newVertices, vertex))
+      newVertices.push(vertex.clone())
+  });
+
+  return newVertices;
+}
+
 //Inspired by this: https://www.youtube.com/watch?v=Z58_Zsa6YTo
 var QuickHull3D = function(mesh)
 {
-  var allVertices = extractVertices(mesh);
-  if(allVertices.length < 4)
+  var remainingVertices = extractVertices(mesh);
+  if(remainingVertices.length < 4)
     throw new Error("Can't form a hull.");
 
   //randomness for testing
   var vertices = [];
   for(var i = 0; i < 4; i++)
   {
-    var index = getRandomInt(0, allVertices.length - 1);
-    vertices.push(allVertices[index]);
-    allVertices.splice(index, 1);
+    var index = getRandomInt(0, remainingVertices.length - 1);
+    vertices.push(remainingVertices[index]);
+    remainingVertices.splice(index, 1);
   }
 
   var hull = [];
@@ -81,11 +93,124 @@ var QuickHull3D = function(mesh)
     hull.push(nextTri)
   }
 
-  //1. starting triangle
-  //2. create half-space partition, find furthest vertex
-  //3. find visible faces to that vertex
-  //4. delete visible faces, determine horizontal ridge
-  //5. connect furthest vertex with horizontal ridge
+  while(remainingVertices.length > 0)
+  {
+    //1. starting triangle
+    var index = getNextFace(hull, remainingVertices);
+    console.log(index);
+    if(index !== undefined)
+    {
+      //2. create half-space partition, find furthest vertex
+      var furthestVertexIndex = getFurthestVertex(hull[index], remainingVertices);
+      var vertex = remainingVertices.splice(furthestVertexIndex, 1)[0];
+      //3. find visible faces to that vertex
+      var faceIndexes = getVisibleFaces(vertex, hull);
+      //4. delete visible faces, determine horizontal ridge
+      var ridge = removeFaces(faceIndexes, hull);
+      //5. connect furthest vertex with horizontal ridge
+      connectVertexToHull(hull, vertex, ridge);
+    }
+    else
+    {
+      throw new Error("This should always evaluate to true due to the length check before...");
+    }
+
+  }
+
 
   return hull;
+}
+
+var getNextFace = function(hull, remainingVertices)
+{
+  for(var i = 0; i < hull.length; i++)
+  {
+    var normal = hull[i].getNormal();
+    for(var j = 0; j < remainingVertices.length; j++)
+    {
+      var vectorTo = remainingVertices[j].clone().sub(normal.point).normalize();
+      if(normal.direction.dot(vectorTo) >= 0)
+        return i;
+    }
+  }
+  return;
+}
+
+var getFurthestVertex = function(face, remainingVertices)
+{
+  var facingVertexIndexes = [];
+  var normal = face.getNormal();
+  for(var i = 0; i < remainingVertices.length; i++)
+  {
+    var vectorTo = remainingVertices[i].clone().sub(normal.point).normalize();
+    if(normal.direction.dot(vectorTo) >= 0)
+      facingVertexIndexes.push(i);
+  }
+
+  if(facingVertexIndexes.length == 0)
+    throw new Error("This should be impossible, I call this after checking that at least 1 exists...");
+
+  var biggestDistance = -Infinity;
+  var biggestDistIndex = -1;
+  for(var i = 0; i < facingVertexIndexes.length; i++)
+  {
+    var distance = normal.point.distanceToSquared(remainingVertices[i]);
+    if(distance > biggestDistance)
+    {
+      biggestDistance = distance;
+      biggestDistIndex = i;
+    }
+  }
+
+  return biggestDistIndex;
+}
+
+var getVisibleFaces = function(vertex, hull)
+{
+  var faceIndexes = [];
+  for(var i = 0; i < hull.length; i++)
+  {
+    var normal = hull[i].getNormal();
+    var vertexTo = normal.point.clone().sub(vertex).normalize();
+    if(vertexTo.dot(normal.direction) < 0)
+      faceIndexes.push(i);
+  }
+
+  return faceIndexes;
+}
+
+//hull passed by reference here, and is mutated
+var removeFaces = function(faceIndexes, hull)
+{
+  var ridge = [];
+  var removedFaces = [];
+  for(var i = faceIndexes.length - 1; i > -1; i--)
+  {
+    removedFaces.push(hull.splice(i, 1)[0]);
+  }
+
+  var removedVertices = extractVertices(removedFaces);
+  var keptVertices = extractVertices(hull);
+
+  for(var i = 0; i < removedVertices.length; i++)
+  {
+    if(collectionIncludesVector(keptVertices, removedVertices[i]))
+      ridge.push(removedVertices[i]);
+  }
+
+  ridge = removeDuplicateVertices(ridge);
+  //TODO: sort the ridge in clockwise order
+  return ridge;
+}
+
+var connectVertexToHull = function(hull, vertex, ridge)
+{
+  //assume ridge is already sorted in clockwise order
+  for(var i = 0; i < ridge.length; i++)
+  {
+    var first = ridge[i].clone();
+    var second = ridge[(i + 1) % ridge.length].clone();
+    var third = vertex.clone();
+    hull.push(new Triangle([first, second, third]));
+  }
 }
