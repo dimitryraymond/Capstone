@@ -115,6 +115,10 @@ var QuickHull3D = function(mesh, targetVertices)
       //4. delete visible faces, determine horizontal ridge
       var ridge = removeFaces(faceIndexes, hull);
       var ridge = sortClockwise(ridge, vertex); //TODO: this isn't working perfectly yet...
+      var ridge = walkClockwise(ridge, vertex, hull);
+      var centerVertex = getCenter(ridge);
+      centerVertex.color = 'red';
+      targetVertices.push(centerVertex);
       var colors = [
         'rgba(148, 0, 211, 1)',
         'rgba(75, 0, 130, 1)',
@@ -125,11 +129,11 @@ var QuickHull3D = function(mesh, targetVertices)
         'rgba(255, 0, 0, 1)'
       ];
       for(var i = 0; i < ridge.length; i++){
-        ridge[i].color = colors[i + 2];
+        ridge[i].color = colors[i + 1];
         targetVertices.push(ridge[i]);
       }
       //5. connect furthest vertex with horizontal ridge
-      // connectVertexToHull(hull, vertex, ridge);
+      connectVertexToHull(hull, vertex, ridge);
     }
     else
     {
@@ -268,6 +272,33 @@ var sortClockwise = function(ridge, vertex)
       }
     }
   }
+  return ridge;
+}
+
+var walkClockwise = function(ridge, vertex, hull)
+{
+  var center = getCenter(ridge);
+  var counts = [];
+  var normal = center.clone().sub(vertex).normalize(); //point towards the ridge
+  var allPoints = [];
+  hull.forEach(function(triangle){
+    triangle.vertices.forEach(function(vertex){
+      allPoints.push(vertex.clone());
+    });
+  });
+  for(var i = 0; i < ridge.length; i++)
+  {
+    var c = 0;
+    for(var j = 0; j < allPoints.length; j++)
+    {
+      if(ridge[i].equals(allPoints[j]))
+        c += 1;
+    }
+    counts.push(c);
+
+  }
+  console.log(counts);
+  //pick the second point
   return ridge;
 }
 
