@@ -127,7 +127,8 @@ Model.prototype.getGlobalMesh = function(targetMesh, targetBoundsMesh, targetHul
   for(var i = 0; i < this.debugVertices.length; i++)
   {
     var vertex = this.debugVertices[i].clone().applyQuaternion(this.quaternion);//apply rotation of model
-    targetVertices.push(vertex);
+    vertex.color = this.debugVertices[i].color;
+    targetVertices.push(vertex.add(this.position));
   }
 
 }

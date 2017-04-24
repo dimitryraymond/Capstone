@@ -92,7 +92,13 @@ var QuickHull3D = function(mesh, targetVertices)
     var nextTri = new Triangle([tri1.vertices[first].clone(), vertices[3].clone(), tri1.vertices[third].clone()])
     hull.push(nextTri)
   }
+  //create tetrahedron DONE
 
+  //debug info
+  for(var i = 0; i < vertices.length; i++)
+    targetVertices.push(vertices[i].clone());
+
+  //algorithm itteration
   if(remainingVertices.length > 0)
   {
     //1. starting triangle
@@ -102,15 +108,15 @@ var QuickHull3D = function(mesh, targetVertices)
       //2. create half-space partition, find furthest vertex
       var furthestVertexIndex = getFurthestVertex(hull[index], remainingVertices);
       var vertex = remainingVertices.splice(furthestVertexIndex, 1)[0];
-      // vertex = vertex.clone().color = 'red';
+      vertex.color = 'red';
       targetVertices.push(vertex);
       //3. find visible faces to that vertex
       var faceIndexes = getVisibleFaces(vertex, hull);
       //4. delete visible faces, determine horizontal ridge
-      var ridge = removeFaces(faceIndexes, hull); //TODO: change this back to remove instead of color red
-      // var ridge = sortClockwise(ridge, vertex)
+      var ridge = removeFaces(faceIndexes, hull);
+      var ridge = sortClockwise(ridge, vertex)
       //5. connect furthest vertex with horizontal ridge
-      // connectVertexToHull(hull, vertex, ridge);
+      connectVertexToHull(hull, vertex, ridge);
     }
     else
     {
@@ -188,8 +194,8 @@ var removeFaces = function(faceIndexes, hull)
   var removedFaces = [];
   for(var i = faceIndexes.length - 1; i > -1; i--)
   {
-    // removedFaces.push(hull.splice(i, 1)[0]);
-    hull[i].color = 'rgba(255, 0, 0, .4)';
+    removedFaces.push(hull.splice(faceIndexes[i], 1)[0]);
+    // hull[faceIndexes[i]].color = 'rgba(255, 0, 0, .4)';
   }
 
   var removedVertices = extractVertices(removedFaces);

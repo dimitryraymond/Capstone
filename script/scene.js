@@ -297,7 +297,7 @@ Scene.prototype.renderNormal = function(triangle)
 Scene.prototype.renderVertex = function(vertex)
 {
   var triangle = new Triangle();
-  var size = 5;
+  var size = 15;
   triangle.vertices[0] = vertex.clone().add(new THREE.Vector3(size, 0, -size));
   triangle.vertices[1] = vertex.clone().add(new THREE.Vector3(0, size, size));
   triangle.vertices[2] = vertex.clone().add(new THREE.Vector3(-size / 2, -size / 2, size));
