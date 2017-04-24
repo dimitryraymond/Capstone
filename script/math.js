@@ -114,9 +114,22 @@ var QuickHull3D = function(mesh, targetVertices)
       var faceIndexes = getVisibleFaces(vertex, hull);
       //4. delete visible faces, determine horizontal ridge
       var ridge = removeFaces(faceIndexes, hull);
-      var ridge = sortClockwise(ridge, vertex)
+      var ridge = sortClockwise(ridge, vertex); //TODO: this isn't working perfectly yet...
+      var colors = [
+        'rgba(148, 0, 211, 1)',
+        'rgba(75, 0, 130, 1)',
+        'rgba(0, 0, 255, 1)',
+        'rgba(0, 255, 0, 1)',
+        'rgba(255, 255, 0, 1)',
+        'rgba(255, 127, 0, 1)',
+        'rgba(255, 0, 0, 1)'
+      ];
+      for(var i = 0; i < ridge.length; i++){
+        ridge[i].color = colors[i + 2];
+        targetVertices.push(ridge[i]);
+      }
       //5. connect furthest vertex with horizontal ridge
-      connectVertexToHull(hull, vertex, ridge);
+      // connectVertexToHull(hull, vertex, ridge);
     }
     else
     {
@@ -250,7 +263,7 @@ var sortClockwise = function(ridge, vertex)
       {
         var cross = ridge[i].clone().sub(center).cross(ridge[j].clone().sub(center));
         var dot = normal.dot(cross);
-        if(dot < 0)
+        if(dot > 0)
           swap(ridge, i, j);
       }
     }
