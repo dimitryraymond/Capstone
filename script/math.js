@@ -57,6 +57,24 @@ var removeDuplicateVertices = function(vertices)
   return newVertices;
 }
 
+//debuging purposes
+var hasSameElements = function(group1, gropu1)
+{
+  for(var i = 0; i < group1.length; i++)
+  {
+    var hasMatch = false;
+    for(var j = 0; j < group1.length; j++)
+    {
+      if(group1[i].equals(group2[j]))
+        hasMatch = true;
+    }
+    if(!hasMatch)
+      return false;
+  }
+
+  return true;
+}
+
 //Inspired by this: https://www.youtube.com/watch?v=Z58_Zsa6YTo
 var QuickHull3D = function(mesh, targetVertices)
 {
@@ -69,8 +87,9 @@ var QuickHull3D = function(mesh, targetVertices)
   for(var i = 0; i < 4; i++)
   {
     var index = getRandomInt(0, remainingVertices.length - 1);
+    // index = i + 1;
     vertices.push(remainingVertices[index]);
-    remainingVertices.splice(index, 1);
+    // remainingVertices.splice(index, 1);
   }
 
   var hull = [];
@@ -99,7 +118,7 @@ var QuickHull3D = function(mesh, targetVertices)
     targetVertices.push(vertices[i].clone());
 
   //algorithm itteration
-  if(remainingVertices.length > 0)
+  while(remainingVertices.length > 0)
   {
     //1. starting triangle
     var index = getNextFace(hull, remainingVertices);
@@ -228,12 +247,11 @@ var removeFaces = function(faceIndexes, hull)
   return ridge;
 }
 
-//
-var swap = function(someArray, index1, index2)
-{
-  var x = someArray[index2];
-  someArray[index2] = someArray[index1];
-  someArray[index1] = x;
+Array.prototype.swap = function (x,y) {
+  var b = this[x];
+  this[x] = this[y];
+  this[y] = b;
+  return this;
 }
 
 var getCenter = function(vertices)
@@ -255,32 +273,33 @@ var getCenter = function(vertices)
 //use vertex as a robust reference point to calculate the normal
 var sortClockwise = function(ridge, vertex)
 {
+  console.log(ridge.length);
   var center = getCenter(ridge);
   var normal = center.clone().sub(vertex).normalize();
   //simple bubble sort
   for(var i = 0; i < ridge.length; i++)
   {
-    for(var j = 0; j < ridge.length; j++)
+    for(var j = 1; j < ridge.length; j++)
     {
-      if(i != j)
+      var cross = ridge[j - 1].clone().sub(center).cross(ridge[j].clone().sub(center)).normalize();
+      var dot = normal.dot(cross);
+      if(dot < 0)
       {
-        var cross = ridge[i].clone().sub(center).cross(ridge[j].clone().sub(center));
-        var dot = normal.dot(cross);
-        if(dot > 0)
-          swap(ridge, i, j);
+        ridge.swap(j, j - 1);
       }
     }
   }
-
   //last check
   for(var i = 0; i < ridge.length; i++)
   {
     var a = i;
     var b = (i + 1) % ridge.length;
-    var cross = ridge[a].clone().sub(center).cross(ridge[b].clone().sub(center));
+    var cross = ridge[a].clone().sub(center).cross(ridge[b].clone().sub(center)).normalize();
     var dot = normal.dot(cross);
-    console.log(dot > 0);
+    console.log(dot >= 0);
   }
+  console.log(ridge.length);
+  console.log('--------');
   return ridge;
 }
 

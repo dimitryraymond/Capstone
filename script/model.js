@@ -58,7 +58,8 @@ Model.prototype.updateBoundingMesh = function()
 
 Model.prototype.updateConvexHull = function()
 {
-  this.convexMesh = QuickHull3D(this.mesh, this.debugVertices);
+  //too buggy for presentation
+  // this.convexMesh = QuickHull3D(this.mesh, this.debugVertices);
 }
 
 Model.prototype.updatePhysics = function () {
