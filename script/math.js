@@ -115,7 +115,6 @@ var QuickHull3D = function(mesh, targetVertices)
       //4. delete visible faces, determine horizontal ridge
       var ridge = removeFaces(faceIndexes, hull);
       var ridge = sortClockwise(ridge, vertex); //TODO: this isn't working perfectly yet...
-      var ridge = walkClockwise(ridge, vertex, hull);
       var centerVertex = getCenter(ridge);
       centerVertex.color = 'red';
       targetVertices.push(centerVertex);
@@ -133,7 +132,7 @@ var QuickHull3D = function(mesh, targetVertices)
         targetVertices.push(ridge[i]);
       }
       //5. connect furthest vertex with horizontal ridge
-      connectVertexToHull(hull, vertex, ridge);
+      // connectVertexToHull(hull, vertex, ridge);
     }
     else
     {
@@ -272,35 +271,45 @@ var sortClockwise = function(ridge, vertex)
       }
     }
   }
-  return ridge;
-}
 
-var walkClockwise = function(ridge, vertex, hull)
-{
-  var center = getCenter(ridge);
-  var counts = [];
-  var normal = center.clone().sub(vertex).normalize(); //point towards the ridge
-  var allPoints = [];
-  hull.forEach(function(triangle){
-    triangle.vertices.forEach(function(vertex){
-      allPoints.push(vertex.clone());
-    });
-  });
+  //last check
   for(var i = 0; i < ridge.length; i++)
   {
-    var c = 0;
-    for(var j = 0; j < allPoints.length; j++)
-    {
-      if(ridge[i].equals(allPoints[j]))
-        c += 1;
-    }
-    counts.push(c);
-
+    var a = i;
+    var b = (i + 1) % ridge.length;
+    var cross = ridge[a].clone().sub(center).cross(ridge[b].clone().sub(center));
+    var dot = normal.dot(cross);
+    console.log(dot > 0);
   }
-  console.log(counts);
-  //pick the second point
   return ridge;
 }
+
+// var walkClockwise = function(ridge, vertex, hull)
+// {
+//   var center = getCenter(ridge);
+//   var counts = [];
+//   var normal = center.clone().sub(vertex).normalize(); //point towards the ridge
+//   var allPoints = [];
+//   hull.forEach(function(triangle){
+//     triangle.vertices.forEach(function(vertex){
+//       allPoints.push(vertex.clone());
+//     });
+//   });
+//   for(var i = 0; i < ridge.length; i++)
+//   {
+//     var c = 0;
+//     for(var j = 0; j < allPoints.length; j++)
+//     {
+//       if(ridge[i].equals(allPoints[j]))
+//         c += 1;
+//     }
+//     counts.push(c);
+//
+//   }
+//   console.log(counts);
+//   //pick the second point
+//   return ridge;
+// }
 
 var connectVertexToHull = function(hull, vertex, ridge)
 {
