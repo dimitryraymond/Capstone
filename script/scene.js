@@ -47,6 +47,9 @@ Scene.prototype.initKeyboard = function()
     //toggle danger mode
     if(e.keyCode == key.grave)
       self.dangerMode = !self.dangerMode;
+
+    if(e.keyCode == key.one)
+      self.addRandomBoxModels();
   }
   document.onkeyup = function(e){
     self.keysDown[e.keyCode] = false;
@@ -179,6 +182,31 @@ Scene.prototype.updatePhysics = function()
 Scene.prototype.addModel = function(model)
 {
   this.models.push(model);
+}
+
+Scene.prototype.addRandomBoxModels = function()
+{
+  var position = new THREE.Vector3();
+  position.x = getRandomInt(-1000, 1000);
+  position.y = getRandomInt(-1000, 1000);
+  position.z = getRandomInt(-1000, -100);
+  var model = new Model();
+  model.position = position;
+  var x = getRandomInt(1, 5);
+  var y = getRandomInt(1, 5);
+  var z = getRandomInt(1, 5);
+  for(var i = -Math.floor(x / 2); i < x / 2; i++)
+  {
+    for(var j = -Math.floor(y / 2); j < y / 2; j++)
+    {
+      for(var k = -Math.floor(z / 2); k < z; k++)
+      {
+        var position = new THREE.Vector3(i * 100, j * 100, k * 100);
+        Meshes.addBox(model.mesh, position, new THREE.Vector3(100, 100, 100));
+      }
+    }
+  }
+  this.addModel(model);
 }
 
 Scene.prototype.play = function()
