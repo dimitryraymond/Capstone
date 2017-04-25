@@ -22,6 +22,7 @@ function Scene(canvasId)
   this.logged = false;
   this.fill = false;
   this.showDebug = true;
+  this.dangerMode = false;
 }
 
 Scene.prototype.initKeyboard = function()
@@ -42,6 +43,10 @@ Scene.prototype.initKeyboard = function()
     //toggle debug display
     if(e.keyCode == key.z)
       self.showDebug = !self.showDebug;
+
+    //toggle danger mode
+    if(e.keyCode == key.grave)
+      self.dangerMode = !self.dangerMode;
   }
   document.onkeyup = function(e){
     self.keysDown[e.keyCode] = false;
@@ -115,10 +120,14 @@ Scene.prototype.updateInput = function()
     this.camera.turnLeft();
   else if(this.mouseCoords.x > 900)
     this.camera.turnRight();
-  if(this.mouseCoords.y < 50)
-    this.camera.turnUp();
-  else if(this.mouseCoords.y > 450)
-    this.camera.turnDown();
+
+  if(this.dangerMode)
+  {
+    if(this.mouseCoords.y < 50)
+      this.camera.turnUp();
+    else if(this.mouseCoords.y > 450)
+      this.camera.turnDown();
+  }
 
   //misc
   if(this.keysDown[key.r])
@@ -188,9 +197,8 @@ Scene.prototype.offsetToCamera = function(vertex)
   t3DVertex.y = vertex.y - this.camera.position.y;
   t3DVertex.z = vertex.z - this.camera.position.z;
 
-  var quaternion = new THREE.Quaternion().setFromUnitVectors(this.camera.angle, new THREE.Vector3(0, 0, -1));
-
-  t3DVertex.applyQuaternion(quaternion);
+  t3DVertex.applyQuaternion(this.camera.quaternionH.clone().conjugate());
+  t3DVertex.applyQuaternion(this.camera.quaternionV.clone().conjugate());
 
   return t3DVertex;
 }

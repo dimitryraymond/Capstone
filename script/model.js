@@ -79,7 +79,7 @@ Model.prototype.updatePhysics = function () {
 
     var magnitude = this.angularVelocity.distanceTo(new THREE.Vector3()) * Math.PI / 30 / 2 //30 for fps
     quaternion = new THREE.Quaternion().setFromAxisAngle(this.angularVelocity.clone().normalize(), magnitude);
-    this.angle.applyQuaternion(quaternion);
+    // this.angle.applyQuaternion(quaternion);
 
     this.quaternion.multiply(quaternion);
   }

@@ -51,7 +51,7 @@ Triangle.prototype.isClockwise = function(camera)
 {
   var normal = this.getNormal();
   //this is where the user's eyes are relative to screen (simulated by camera.zoom)
-  var viewPosition = camera.position.clone().sub(camera.angle.clone().multiplyScalar(camera.zoom));
+  var viewPosition = camera.position.clone().sub(camera.getAngle().clone().multiplyScalar(camera.zoom));
   var cameraVector = normal.point.clone().sub(viewPosition);
 
   //normalize becasue this is between two equally sized vectors
