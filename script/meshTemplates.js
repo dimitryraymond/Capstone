@@ -56,7 +56,7 @@ var Meshes = {
     var botLevel = height / 2;
 
     var startVector = new THREE.Vector3(1 * radius, height / 2, 0);
-    var topCenterVector = new THREE.Vector3(0, height || height / 2, 0).add(position);
+    var topCenterVector = new THREE.Vector3(0, height / 2, 0).add(position);
     var topVectors = [startVector];
     var rad = Math.PI * 2 / n;
     for(var i = 0; i < n - 1; i++)
@@ -84,16 +84,16 @@ var Meshes = {
       thisMesh.push(new Triangle([left, center, right]));
     }
 
-    // //build bottom face
-    // for(var i = 0; i < n; i++)
-    // {
-    //   var triangle = new Triangle();
-    //   for(var j = 0; j < 3; j++)
-    //   {
-    //     triangle.vertices[2 - j] = thisMesh[i].vertices[j].clone().add(new THREE.Vector3(0, -height, 0));
-    //   }
-    //   target.push(triangle);
-    // }
+    //build bottom face
+    for(var i = 0; i < n; i++)
+    {
+      var triangle = new Triangle();
+      for(var j = 0; j < 3; j++)
+      {
+        triangle.vertices[2 - j] = thisMesh[i].vertices[j].clone().add(new THREE.Vector3(0, -height, 0));
+      }
+      target.push(triangle);
+    }
 
     for(var i = 0; i < n; i++)
     {

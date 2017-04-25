@@ -297,7 +297,7 @@ Scene.prototype.renderNormal = function(triangle)
 Scene.prototype.renderVertex = function(vertex)
 {
   var triangle = new Triangle();
-  var size = 15;
+  var size = 5;
   triangle.vertices[0] = vertex.clone().add(new THREE.Vector3(size, 0, -size));
   triangle.vertices[1] = vertex.clone().add(new THREE.Vector3(0, size, size));
   triangle.vertices[2] = vertex.clone().add(new THREE.Vector3(-size / 2, -size / 2, size));
@@ -323,8 +323,8 @@ Scene.prototype.updateGraphics = function()
       if(mesh[j].isClockwise(this.camera))
       {
         this.renderTriangle(mesh[j]);
-        // if(this.showDebug)
-        //   this.renderNormal(mesh[j]);
+        if(this.showDebug)
+          this.renderNormal(mesh[j]);
       }
     }
 
@@ -333,7 +333,7 @@ Scene.prototype.updateGraphics = function()
     {
       for(var j = 0; j < boundsMesh.length; j++)
       {
-        // this.renderTriangle(boundsMesh[j], 'red');
+        this.renderTriangle(boundsMesh[j], 'red');
       }
 
       for(var j = 0; j < hullMesh.length; j++)
@@ -346,13 +346,14 @@ Scene.prototype.updateGraphics = function()
       {
         this.renderVertex(debugVertices[j]);
       }
+
+      // render the vertices of the model
+      var vertices = extractVertices(mesh);
+      var self = this;
+      vertices.forEach(function(vertex){
+        self.renderVertex(vertex);
+      });
     }
 
-    // render the vertices of the model
-    // var vertices = extractVertices(mesh);
-    // var self = this;
-    // vertices.forEach(function(vertex){
-    //   self.renderVertex(vertex);
-    // });
   }
 }
