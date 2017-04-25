@@ -14,7 +14,6 @@ function Model()
   this.mass = 100;
   this.force = new THREE.Vector3(0, 0, 0); //this gets set and then 'consumed'
 
-  this.angle = new THREE.Vector3(0 ,0 ,1);
   this.quaternion = new THREE.Quaternion();
   this.angularVelocity = new THREE.Vector3(0, 0, 0);
   this.innertia = 0; //TODO: compute this using a callback probably
@@ -79,7 +78,6 @@ Model.prototype.updatePhysics = function () {
 
     var magnitude = this.angularVelocity.distanceTo(new THREE.Vector3()) * Math.PI / 30 / 2 //30 for fps
     quaternion = new THREE.Quaternion().setFromAxisAngle(this.angularVelocity.clone().normalize(), magnitude);
-    // this.angle.applyQuaternion(quaternion);
 
     this.quaternion.multiply(quaternion);
   }

@@ -356,11 +356,11 @@ Scene.prototype.updateGraphics = function()
       }
 
       // render the vertices of the model
-      var vertices = extractVertices(mesh);
-      var self = this;
-      vertices.forEach(function(vertex){
-        self.renderVertex(vertex);
-      });
+      // var vertices = extractVertices(mesh);
+      // var self = this;
+      // vertices.forEach(function(vertex){
+      //   self.renderVertex(vertex);
+      // });
     }
 
   }
