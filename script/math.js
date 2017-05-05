@@ -1,3 +1,5 @@
+//for rounding errors
+var e = 0.001;
 var getRandomInt = function(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -76,7 +78,7 @@ var hasSameElements = function(group1, gropu1)
 }
 
 //Inspired by this: https://www.youtube.com/watch?v=Z58_Zsa6YTo
-var QuickHull3D = function(mesh, targetVertices)
+var QuickHull3D = function(mesh, targetVertices, targetDebugFaceSets)
 {
   var remainingVertices = extractVertices(mesh);
   if(remainingVertices.length < 4)
@@ -89,7 +91,7 @@ var QuickHull3D = function(mesh, targetVertices)
     var index = getRandomInt(0, remainingVertices.length - 1);
     // index = i + 1;
     vertices.push(remainingVertices[index]);
-    // remainingVertices.splice(index, 1);
+    remainingVertices.splice(index, 1);
   }
 
   var hull = [];
@@ -113,55 +115,53 @@ var QuickHull3D = function(mesh, targetVertices)
   }
   //create tetrahedron DONE
 
+  //copy over to debug info
+  var set = [];
+  hull.forEach(function(triangle){
+    set.push(triangle.clone());
+  });
+  targetDebugFaceSets.push(set);
+
   //debug info
-  for(var i = 0; i < vertices.length; i++)
-    targetVertices.push(vertices[i].clone());
+  // for(var i = 0; i < vertices.length; i++)
+  //   targetVertices.push(vertices[i].clone());
 
   //algorithm itteration
-  while(remainingVertices.length > 0)
-  {
-    //1. starting triangle
-    var index = getNextFace(hull, remainingVertices);
-    if(index !== undefined)
-    {
-      //2. create half-space partition, find furthest vertex
-      var furthestVertexIndex = getFurthestVertex(hull[index], remainingVertices);
-      var vertex = remainingVertices.splice(furthestVertexIndex, 1)[0];
-      vertex.color = 'red';
-      targetVertices.push(vertex);
-      //3. find visible faces to that vertex
-      var faceIndexes = getVisibleFaces(vertex, hull);
-      //4. delete visible faces, determine horizontal ridge
-      var ridge = removeFaces(faceIndexes, hull);
-      var ridge = sortClockwise(ridge, vertex); //TODO: this isn't working perfectly yet...
-      var centerVertex = getCenter(ridge);
-      centerVertex.color = 'red';
-      targetVertices.push(centerVertex);
-      var colors = [
-        'rgba(148, 0, 211, 1)',
-        'rgba(75, 0, 130, 1)',
-        'rgba(0, 0, 255, 1)',
-        'rgba(0, 255, 0, 1)',
-        'rgba(255, 255, 0, 1)',
-        'rgba(255, 127, 0, 1)',
-        'rgba(255, 0, 0, 1)'
-      ];
-      for(var i = 0; i < ridge.length; i++){
-        ridge[i].color = colors[i + 1];
-        targetVertices.push(ridge[i]);
-      }
-      //5. connect furthest vertex with horizontal ridge
-      // connectVertexToHull(hull, vertex, ridge);
-    }
-    else
-    {
-      throw new Error("This should always evaluate to true due to the length check before...");
-    }
 
+  //1. starting triangle
+  var index = getNextFace(hull, remainingVertices);
+  if(index !== undefined)
+  {
+    QuickHull3DItteration(hull, remainingVertices, index, targetDebugFaceSets);
   }
 
-
   return hull;
+}
+
+var QuickHull3DItteration = function(hull, remainingVertices, nextFaceIndex, targetDebugFaceSets)
+{
+  //2. create half-space partition, find furthest vertex
+  var furthestVertexIndex = getFurthestVertex(hull[nextFaceIndex], remainingVertices);
+  var vertex = remainingVertices.splice(furthestVertexIndex, 1)[0];
+  //3. find visible faces to that vertex
+  var faceIndexes = getVisibleFaces(vertex, hull);
+  //4. delete visible faces, determine horizontal ridge
+  var ridge = removeFaces(faceIndexes, hull);
+  var ridge = sortClockwise(ridge, vertex);
+  //5. connect furthest vertex with horizontal ridge
+  connectVertexToHull(hull, vertex, ridge);
+
+  var set = [];
+  hull.forEach(function(triangle){
+    set.push(triangle.clone());
+  });
+  targetDebugFaceSets.push(set);
+
+  var index = getNextFace(hull, remainingVertices);
+  if(index !== undefined)
+  {
+    QuickHull3DItteration(hull, remainingVertices, index, targetDebugFaceSets);
+  }
 }
 
 var getNextFace = function(hull, remainingVertices)
@@ -172,7 +172,7 @@ var getNextFace = function(hull, remainingVertices)
     for(var j = 0; j < remainingVertices.length; j++)
     {
       var vectorTo = remainingVertices[j].clone().sub(normal.point).normalize();
-      if(normal.direction.dot(vectorTo) >= 0)
+      if(normal.direction.dot(vectorTo) > 0 + e)
         return i;
     }
   }
@@ -215,7 +215,7 @@ var getVisibleFaces = function(vertex, hull)
   {
     var normal = hull[i].getNormal();
     var vertexTo = normal.point.clone().sub(vertex).normalize();
-    if(vertexTo.dot(normal.direction) < 0)
+    if(vertexTo.dot(normal.direction) < 0 - e)
       faceIndexes.push(i);
   }
 
@@ -273,7 +273,6 @@ var getCenter = function(vertices)
 //use vertex as a robust reference point to calculate the normal
 var sortClockwise = function(ridge, vertex)
 {
-  console.log(ridge.length);
   var center = getCenter(ridge);
   var normal = center.clone().sub(vertex).normalize();
   //simple bubble sort
@@ -296,39 +295,9 @@ var sortClockwise = function(ridge, vertex)
     var b = (i + 1) % ridge.length;
     var cross = ridge[a].clone().sub(center).cross(ridge[b].clone().sub(center)).normalize();
     var dot = normal.dot(cross);
-    console.log(dot >= 0);
   }
-  console.log(ridge.length);
-  console.log('--------');
   return ridge;
 }
-
-// var walkClockwise = function(ridge, vertex, hull)
-// {
-//   var center = getCenter(ridge);
-//   var counts = [];
-//   var normal = center.clone().sub(vertex).normalize(); //point towards the ridge
-//   var allPoints = [];
-//   hull.forEach(function(triangle){
-//     triangle.vertices.forEach(function(vertex){
-//       allPoints.push(vertex.clone());
-//     });
-//   });
-//   for(var i = 0; i < ridge.length; i++)
-//   {
-//     var c = 0;
-//     for(var j = 0; j < allPoints.length; j++)
-//     {
-//       if(ridge[i].equals(allPoints[j]))
-//         c += 1;
-//     }
-//     counts.push(c);
-//
-//   }
-//   console.log(counts);
-//   //pick the second point
-//   return ridge;
-// }
 
 var connectVertexToHull = function(hull, vertex, ridge)
 {

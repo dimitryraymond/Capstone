@@ -75,6 +75,28 @@ Scene.prototype.initMouse = function()
 
     self.mouseCoords = {x, y};
   }
+
+  //for debug
+  document.onmousewheel = function(e){
+    if(e.deltaY < 0)
+      self.incrementDebugItems();
+    else
+      self.decrementDebugItems();
+  }
+}
+
+Scene.prototype.incrementDebugItems = function()
+{
+  this.models.forEach(function(model){
+    model.debugFacesIndex = model.debugFacesIndex == model.debugFaceSets.length - 1 ? model.debugFaceSets.length - 1 : model.debugFacesIndex + 1;
+  });
+}
+
+Scene.prototype.decrementDebugItems = function()
+{
+  this.models.forEach(function(model){
+    model.debugFacesIndex = model.debugFacesIndex == 0 ? 0 : model.debugFacesIndex - 1;
+  });
 }
 
 Scene.prototype.clearScreen = function()
@@ -352,15 +374,16 @@ Scene.prototype.updateGraphics = function()
     var boundsMesh = [];
     var hullMesh = [];
     var debugVertices = [];
-    model.getGlobalMesh(mesh, boundsMesh, hullMesh, debugVertices); //pass by reference
+    var debugFaceSet = [];
+    model.getGlobalMesh(mesh, boundsMesh, hullMesh, debugVertices, debugFaceSet); //pass by reference
     //render actual model
     for(var j = 0; j < mesh.length; j++)
     {
       if(mesh[j].isClockwise(this.camera))
       {
-        this.renderTriangle(mesh[j]);
-        if(this.showDebug)
-          this.renderNormal(mesh[j]);
+        // this.renderTriangle(mesh[j]);
+        // if(this.showDebug)
+          // this.renderNormal(mesh[j]);
       }
     }
 
@@ -369,18 +392,24 @@ Scene.prototype.updateGraphics = function()
     {
       for(var j = 0; j < boundsMesh.length; j++)
       {
-        this.renderTriangle(boundsMesh[j], 'red');
+        // this.renderTriangle(boundsMesh[j], 'red');
       }
 
       for(var j = 0; j < hullMesh.length; j++)
       {
-        this.renderTriangle(hullMesh[j], [hullMesh[j].color || 'rgba(0, 255, 0, .4)', 'blue']);
-        this.renderNormal(hullMesh[j]);
+        // this.renderTriangle(hullMesh[j], [hullMesh[j].color || 'rgba(0, 255, 0, .4)', 'blue']);
+        // this.renderNormal(hullMesh[j]);
       }
 
       for(var j = 0; j < debugVertices.length; j++)
       {
         this.renderVertex(debugVertices[j]);
+      }
+
+      for(var j = 0; j < debugFaceSet.length; j++)
+      {
+        this.renderTriangle(debugFaceSet[j], [debugFaceSet[j].color || 'rgba(0, 255, 0, .4)', 'blue']);
+        this.renderNormal(debugFaceSet[j]);
       }
 
       // render the vertices of the model

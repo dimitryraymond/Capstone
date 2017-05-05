@@ -4,6 +4,8 @@ function Model()
   this.boundingMesh = []; //used to show bounding perimeter
   this.convexMesh = []; //convex hull of the mesh used for collisions
   this.debugVertices = []; //use to figure out how vertices are treated in the QuickHull3D, etc
+  this.debugFaceSets = [[]]; //array of arrays of triangles
+  this.debugFacesIndex = 0;
   this.boundingRadius = 0;
   this.lastCheckedMeshSize = 0;
 
@@ -58,7 +60,7 @@ Model.prototype.updateBoundingMesh = function()
 Model.prototype.updateConvexHull = function()
 {
   //too buggy for presentation
-  // this.convexMesh = QuickHull3D(this.mesh, this.debugVertices);
+  this.convexMesh = QuickHull3D(this.mesh, this.debugVertices, this.debugFaceSets);
 }
 
 Model.prototype.updatePhysics = function () {
@@ -88,7 +90,7 @@ Model.prototype.computeConvexPolygon = function()
 
 }
 
-Model.prototype.getGlobalMesh = function(targetMesh, targetBoundsMesh, targetHullMesh, targetVertices)
+Model.prototype.getGlobalMesh = function(targetMesh, targetBoundsMesh, targetHullMesh, targetVertices, targetDebugFaceSet)
 {
   for(var i = 0; i < this.mesh.length; i++)
   {
@@ -121,6 +123,17 @@ Model.prototype.getGlobalMesh = function(targetMesh, targetBoundsMesh, targetHul
       tri.vertices[j].add(this.position);
     }
     targetHullMesh.push(tri);
+  }
+
+  for(var i = 0; i < this.debugFaceSets[this.debugFacesIndex].length; i++)
+  {
+    var tri = this.debugFaceSets[this.debugFacesIndex][i].clone();
+    for(var j = 0; j < 3; j++)
+    {
+      tri.vertices[j].applyQuaternion(this.quaternion);//apply rotation of model
+      tri.vertices[j].add(this.position);
+    }
+    targetDebugFaceSet.push(tri);
   }
 
   for(var i = 0; i < this.debugVertices.length; i++)
