@@ -3,9 +3,9 @@ function Model()
   this.mesh = []; //triangles
   this.boundingMesh = []; //used to show bounding perimeter
   this.convexMesh = []; //convex hull of the mesh used for collisions
-  this.debugVertices = []; //use to figure out how vertices are treated in the QuickHull3D, etc
+  this.debugVertexSets = [[]]; //use to figure out how vertices are treated in the QuickHull3D, etc
   this.debugFaceSets = [[]]; //array of arrays of triangles
-  this.debugFacesIndex = 0;
+  this.debugIndex = 0;
   this.boundingRadius = 0;
   this.lastCheckedMeshSize = 0;
 
@@ -60,7 +60,7 @@ Model.prototype.updateBoundingMesh = function()
 Model.prototype.updateConvexHull = function()
 {
   //too buggy for presentation
-  this.convexMesh = QuickHull3D(this.mesh, this.debugVertices, this.debugFaceSets);
+  this.convexMesh = QuickHull3D(this.mesh, this.debugVertexSets, this.debugFaceSets);
 }
 
 Model.prototype.updatePhysics = function () {
@@ -90,7 +90,7 @@ Model.prototype.computeConvexPolygon = function()
 
 }
 
-Model.prototype.getGlobalMesh = function(targetMesh, targetBoundsMesh, targetHullMesh, targetVertices, targetDebugFaceSet)
+Model.prototype.getGlobalMesh = function(targetMesh, targetBoundsMesh, targetHullMesh, targetVertexSet, targetDebugFaceSet)
 {
   for(var i = 0; i < this.mesh.length; i++)
   {
@@ -125,9 +125,9 @@ Model.prototype.getGlobalMesh = function(targetMesh, targetBoundsMesh, targetHul
     targetHullMesh.push(tri);
   }
 
-  for(var i = 0; i < this.debugFaceSets[this.debugFacesIndex].length; i++)
+  for(var i = 0; i < this.debugFaceSets[this.debugIndex].length; i++)
   {
-    var tri = this.debugFaceSets[this.debugFacesIndex][i].clone();
+    var tri = this.debugFaceSets[this.debugIndex][i].clone();
     for(var j = 0; j < 3; j++)
     {
       tri.vertices[j].applyQuaternion(this.quaternion);//apply rotation of model
@@ -136,11 +136,12 @@ Model.prototype.getGlobalMesh = function(targetMesh, targetBoundsMesh, targetHul
     targetDebugFaceSet.push(tri);
   }
 
-  for(var i = 0; i < this.debugVertices.length; i++)
+  for(var i = 0; i < this.debugVertexSets[this.debugIndex].length; i++)
   {
-    var vertex = this.debugVertices[i].clone().applyQuaternion(this.quaternion);//apply rotation of model
-    vertex.color = this.debugVertices[i].color;
-    targetVertices.push(vertex.add(this.position));
+    var vertex = this.debugVertexSets[this.debugIndex][i].clone().applyQuaternion(this.quaternion);//apply rotation of model
+    vertex.color = this.debugVertexSets[this.debugIndex][i].color;
+    vertex.add(this.position)
+    targetVertexSet.push(vertex);
   }
 
 }

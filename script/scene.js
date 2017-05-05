@@ -88,14 +88,14 @@ Scene.prototype.initMouse = function()
 Scene.prototype.incrementDebugItems = function()
 {
   this.models.forEach(function(model){
-    model.debugFacesIndex = model.debugFacesIndex == model.debugFaceSets.length - 1 ? model.debugFaceSets.length - 1 : model.debugFacesIndex + 1;
+    model.debugIndex = model.debugIndex == model.debugFaceSets.length - 1 ? model.debugFaceSets.length - 1 : model.debugIndex + 1;
   });
 }
 
 Scene.prototype.decrementDebugItems = function()
 {
   this.models.forEach(function(model){
-    model.debugFacesIndex = model.debugFacesIndex == 0 ? 0 : model.debugFacesIndex - 1;
+    model.debugIndex = model.debugIndex == 0 ? 0 : model.debugIndex - 1;
   });
 }
 
@@ -355,7 +355,7 @@ Scene.prototype.renderNormal = function(triangle)
 Scene.prototype.renderVertex = function(vertex)
 {
   var triangle = new Triangle();
-  var size = 5;
+  var size = 15;
   triangle.vertices[0] = vertex.clone().add(new THREE.Vector3(size, 0, -size));
   triangle.vertices[1] = vertex.clone().add(new THREE.Vector3(0, size, size));
   triangle.vertices[2] = vertex.clone().add(new THREE.Vector3(-size / 2, -size / 2, size));
@@ -373,9 +373,9 @@ Scene.prototype.updateGraphics = function()
     var mesh = [];
     var boundsMesh = [];
     var hullMesh = [];
-    var debugVertices = [];
+    var debugVertexSet = [];
     var debugFaceSet = [];
-    model.getGlobalMesh(mesh, boundsMesh, hullMesh, debugVertices, debugFaceSet); //pass by reference
+    model.getGlobalMesh(mesh, boundsMesh, hullMesh, debugVertexSet, debugFaceSet); //pass by reference
     //render actual model
     for(var j = 0; j < mesh.length; j++)
     {
@@ -401,23 +401,16 @@ Scene.prototype.updateGraphics = function()
         // this.renderNormal(hullMesh[j]);
       }
 
-      for(var j = 0; j < debugVertices.length; j++)
-      {
-        this.renderVertex(debugVertices[j]);
-      }
-
       for(var j = 0; j < debugFaceSet.length; j++)
       {
         this.renderTriangle(debugFaceSet[j], [debugFaceSet[j].color || 'rgba(0, 255, 0, .4)', 'blue']);
         this.renderNormal(debugFaceSet[j]);
       }
 
-      // render the vertices of the model
-      // var vertices = extractVertices(mesh);
-      // var self = this;
-      // vertices.forEach(function(vertex){
-      //   self.renderVertex(vertex);
-      // });
+      for(var j = 0; j < debugVertexSet.length; j++)
+      {
+        this.renderVertex(debugVertexSet[j]);
+      }
     }
 
   }

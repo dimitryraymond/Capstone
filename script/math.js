@@ -1,5 +1,17 @@
 //for rounding errors
-var e = 0.001;
+var e = 0.00001;
+
+// for debugVertex identification
+var colors = [
+        // 'rgba(148, 0, 211, 1)', //red used for other things
+        'rgba(75, 0, 130, 1)',
+        'rgba(0, 0, 255, 1)',
+        'rgba(0, 255, 0, 1)',
+        'rgba(255, 255, 0, 1)',
+        'rgba(255, 127, 0, 1)',
+        'rgba(255, 0, 0, 1)'
+      ];
+
 var getRandomInt = function(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -78,7 +90,7 @@ var hasSameElements = function(group1, gropu1)
 }
 
 //Inspired by this: https://www.youtube.com/watch?v=Z58_Zsa6YTo
-var QuickHull3D = function(mesh, targetVertices, targetDebugFaceSets)
+var QuickHull3D = function(mesh, targetDebugVertexSets, targetDebugFaceSets)
 {
   var remainingVertices = extractVertices(mesh);
   if(remainingVertices.length < 4)
@@ -122,9 +134,13 @@ var QuickHull3D = function(mesh, targetVertices, targetDebugFaceSets)
   });
   targetDebugFaceSets.push(set);
 
-  //debug info
-  // for(var i = 0; i < vertices.length; i++)
-  //   targetVertices.push(vertices[i].clone());
+  var set = [];
+  for(var i = 0; i < vertices.length; i++)
+  {
+    vertices[i].color = colors[i];
+    set.push(vertices[i].clone());
+  }
+  targetDebugVertexSets.push(set);
 
   //algorithm itteration
 
@@ -132,13 +148,13 @@ var QuickHull3D = function(mesh, targetVertices, targetDebugFaceSets)
   var index = getNextFace(hull, remainingVertices);
   if(index !== undefined)
   {
-    QuickHull3DItteration(hull, remainingVertices, index, targetDebugFaceSets);
+    QuickHull3DItteration(hull, remainingVertices, index, targetDebugVertexSets, targetDebugFaceSets);
   }
 
   return hull;
 }
 
-var QuickHull3DItteration = function(hull, remainingVertices, nextFaceIndex, targetDebugFaceSets)
+var QuickHull3DItteration = function(hull, remainingVertices, nextFaceIndex, targetDebugVertexSets, targetDebugFaceSets)
 {
   //2. create half-space partition, find furthest vertex
   var furthestVertexIndex = getFurthestVertex(hull[nextFaceIndex], remainingVertices);
@@ -148,6 +164,9 @@ var QuickHull3DItteration = function(hull, remainingVertices, nextFaceIndex, tar
   //4. delete visible faces, determine horizontal ridge
   var ridge = removeFaces(faceIndexes, hull);
   var ridge = sortClockwise(ridge, vertex);
+
+  var center = getCenter(ridge);
+  center.color = 'black';
   //5. connect furthest vertex with horizontal ridge
   connectVertexToHull(hull, vertex, ridge);
 
@@ -157,10 +176,21 @@ var QuickHull3DItteration = function(hull, remainingVertices, nextFaceIndex, tar
   });
   targetDebugFaceSets.push(set);
 
+  var set = [];
+  for(var i = 0; i < ridge.length; i++)
+  {
+    ridge[i].color = colors[i];
+    set.push(ridge[i]);
+  }
+  vertex.color = 'red';
+  set.push(vertex);
+  set.push(center);
+  targetDebugVertexSets.push(set);
+
   var index = getNextFace(hull, remainingVertices);
   if(index !== undefined)
   {
-    QuickHull3DItteration(hull, remainingVertices, index, targetDebugFaceSets);
+    QuickHull3DItteration(hull, remainingVertices, index, targetDebugVertexSets, targetDebugFaceSets);
   }
 }
 
@@ -282,9 +312,22 @@ var sortClockwise = function(ridge, vertex)
     {
       var cross = ridge[j - 1].clone().sub(center).cross(ridge[j].clone().sub(center)).normalize();
       var dot = normal.dot(cross);
-      if(dot < 0)
+      if(dot < 0 - e)
       {
         ridge.swap(j, j - 1);
+      }
+      else if(dot >= 0 - e && dot <= 0 + e)
+      {
+        //if two vertexes are completely opposite (180 degree angle)
+        //then offset vertex by an unnoticable ammount and retry the sort
+        var xOffset = Math.random();
+        var yOffset = Math.random();
+        var zOffset = Math.random();
+        console.log(xOffset, yOffset, zOffset);
+        vertex.x += xOffset;
+        vertex.y += yOffset;
+        vertex.z += zOffset;
+        return sortClockwise(ridge, vertex);
       }
     }
   }
@@ -295,6 +338,8 @@ var sortClockwise = function(ridge, vertex)
     var b = (i + 1) % ridge.length;
     var cross = ridge[a].clone().sub(center).cross(ridge[b].clone().sub(center)).normalize();
     var dot = normal.dot(cross);
+    if(dot > 0 + e)
+      console.log('true');
   }
   return ridge;
 }
