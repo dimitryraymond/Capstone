@@ -59,8 +59,8 @@ Model.prototype.updateBoundingMesh = function()
 
 Model.prototype.updateConvexHull = function()
 {
-  //too buggy for presentation
-  this.convexMesh = QuickHull3D(this.mesh, this.debugVertexSets, this.debugFaceSets);
+  this.convexMesh = QuickHull3D(extractVertices(this.mesh), this.debugVertexSets, this.debugFaceSets);
+  pointIsInsideHull(getCenterOfHull(this.convexMesh), this.convexMesh);
 }
 
 Model.prototype.updatePhysics = function () {
@@ -85,12 +85,24 @@ Model.prototype.updatePhysics = function () {
   }
 };
 
-Model.prototype.computeConvexPolygon = function()
+Model.prototype.getGlobalMesh = function()
 {
+  var globalMesh = [];
+  for(var i = 0; i < this.mesh.length; i++)
+  {
+    var tri = this.mesh[i].clone();
+    for(var j = 0; j < 3; j++)
+    {
+      tri.vertices[j].applyQuaternion(this.quaternion);//apply rotation of model
+      tri.vertices[j].add(this.position);
+    }
+    globalMesh.push(tri);
+  }
 
+  return globalMesh;
 }
 
-Model.prototype.getGlobalMesh = function(targetMesh, targetBoundsMesh, targetHullMesh, targetVertexSet, targetDebugFaceSet)
+Model.prototype.getGlobalRenderObjects = function(targetMesh, targetBoundsMesh, targetHullMesh, targetVertexSet, targetDebugFaceSet)
 {
   for(var i = 0; i < this.mesh.length; i++)
   {

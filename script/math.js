@@ -1,5 +1,5 @@
 //for rounding errors
-var e = 0.00001;
+var e = 0.0001;
 
 // for debugVertex identification
 var colors = [
@@ -9,7 +9,7 @@ var colors = [
         'rgba(0, 255, 0, 1)',
         'rgba(255, 255, 0, 1)',
         'rgba(255, 127, 0, 1)',
-        'rgba(255, 0, 0, 1)'
+        'rgba(255, 192, 203, 1)'
       ];
 
 var getRandomInt = function(min, max) {
@@ -28,14 +28,8 @@ var isNullVector = function(vector)
   return vector.x == 0 && vector.y == 0 && vector.z == 0
 }
 
-var mightBeColliding = function(model1, model2)
-{
-  var distance = model1.position.distanceTo(model2.position);
-  return distance < model1.boundingRadius + model2.boundingRadius
-}
-
 //used to avoid duplicates
-//in the models' meshes, every corner touches 4 triangles
+//in the models' meshes, every corner touches 4 triangles(usually)
 //therefore 4 vertices share a common place in the mesh
 var collectionIncludesVector = function(collection, vector)
 {
@@ -47,6 +41,7 @@ var collectionIncludesVector = function(collection, vector)
   return false;
 }
 
+//get's all unique vertices from mesh
 var extractVertices = function(mesh)
 {
   var vertices = [];
@@ -89,10 +84,12 @@ var hasSameElements = function(group1, gropu1)
   return true;
 }
 
+///BOUNDING HULL BEGIN ########################################################
 //Inspired by this: https://www.youtube.com/watch?v=Z58_Zsa6YTo
-var QuickHull3D = function(mesh, targetDebugVertexSets, targetDebugFaceSets)
+var QuickHull3D = function(givenVertices, targetDebugVertexSets, targetDebugFaceSets)
 {
-  var remainingVertices = extractVertices(mesh);
+
+  var remainingVertices = removeDuplicateVertices(givenVertices);
   if(remainingVertices.length < 4)
     throw new Error("Can't form a hull.");
 
@@ -128,19 +125,25 @@ var QuickHull3D = function(mesh, targetDebugVertexSets, targetDebugFaceSets)
   //create tetrahedron DONE
 
   //copy over to debug info
-  var set = [];
-  hull.forEach(function(triangle){
-    set.push(triangle.clone());
-  });
-  targetDebugFaceSets.push(set);
-
-  var set = [];
-  for(var i = 0; i < vertices.length; i++)
+  if(targetDebugFaceSets !== undefined)
   {
-    vertices[i].color = colors[i];
-    set.push(vertices[i].clone());
+    var set = [];
+    hull.forEach(function(triangle){
+      set.push(triangle.clone());
+    });
+    targetDebugFaceSets.push(set);
   }
-  targetDebugVertexSets.push(set);
+
+  if(targetDebugVertexSets !== undefined)
+  {
+    var set = [];
+    for(var i = 0; i < vertices.length; i++)
+    {
+      vertices[i].color = colors[i];
+      set.push(vertices[i].clone());
+    }
+    targetDebugVertexSets.push(set);
+  }
 
   //algorithm itteration
 
@@ -170,22 +173,28 @@ var QuickHull3DItteration = function(hull, remainingVertices, nextFaceIndex, tar
   //5. connect furthest vertex with horizontal ridge
   connectVertexToHull(hull, vertex, ridge);
 
-  var set = [];
-  hull.forEach(function(triangle){
-    set.push(triangle.clone());
-  });
-  targetDebugFaceSets.push(set);
-
-  var set = [];
-  for(var i = 0; i < ridge.length; i++)
+  if(targetDebugFaceSets !== undefined)
   {
-    ridge[i].color = colors[i];
-    set.push(ridge[i]);
+    var set = [];
+    hull.forEach(function(triangle){
+      set.push(triangle.clone());
+    });
+    targetDebugFaceSets.push(set);
   }
-  vertex.color = 'red';
-  set.push(vertex);
-  set.push(center);
-  targetDebugVertexSets.push(set);
+
+  if(targetDebugVertexSets !== undefined)
+  {
+    var set = [];
+    for(var i = 0; i < ridge.length; i++)
+    {
+      ridge[i].color = colors[i];
+      set.push(ridge[i]);
+    }
+    vertex.color = 'red';
+    set.push(vertex);
+    set.push(center);
+    targetDebugVertexSets.push(set);
+  }
 
   var index = getNextFace(hull, remainingVertices);
   if(index !== undefined)
@@ -216,7 +225,7 @@ var getFurthestVertex = function(face, remainingVertices)
   for(var i = 0; i < remainingVertices.length; i++)
   {
     var vectorTo = remainingVertices[i].clone().sub(normal.point).normalize();
-    if(normal.direction.dot(vectorTo) >= 0)
+    if(normal.direction.dot(vectorTo) > 0 + e)
       facingVertexIndexes.push(i);
   }
 
@@ -245,7 +254,7 @@ var getVisibleFaces = function(vertex, hull)
   {
     var normal = hull[i].getNormal();
     var vertexTo = normal.point.clone().sub(vertex).normalize();
-    if(vertexTo.dot(normal.direction) < 0 - e)
+    if(vertexTo.dot(normal.direction) < 0)
       faceIndexes.push(i);
   }
 
@@ -306,17 +315,25 @@ var sortClockwise = function(ridge, vertex)
   var center = getCenter(ridge);
   var normal = center.clone().sub(vertex).normalize();
   //simple bubble sort
-  for(var i = 0; i < ridge.length; i++)
+  for(var i = 1; i < ridge.length; i++)
   {
     for(var j = 1; j < ridge.length; j++)
     {
-      var cross = ridge[j - 1].clone().sub(center).cross(ridge[j].clone().sub(center)).normalize();
+      //old approach
+      // var cross = ridge[j - 1].clone().sub(center).cross(ridge[j].clone().sub(center)).normalize();
+      //new approach
+      //basically, projecting both of the vectors onto a plane orthagonal to the normal(camera to center of ridge of points)
+      var vectorA = ridge[j - 1].clone().sub(center);
+      var vectorB = ridge[j].clone().sub(center);
+      var projectionA = normal.clone().cross(vectorA).cross(normal);
+      var projectionB = normal.clone().cross(vectorB).cross(normal);
+      var cross = projectionA.cross(projectionB).normalize();
       var dot = normal.dot(cross);
-      if(dot < 0 - e)
+      if(dot < 0)
       {
         ridge.swap(j, j - 1);
       }
-      else if(dot >= 0 - e && dot <= 0 + e)
+      else if(dot >= 0 && dot <0)
       {
         //if two vertexes are completely opposite (180 degree angle)
         //then offset vertex by an unnoticable ammount and retry the sort
@@ -327,20 +344,18 @@ var sortClockwise = function(ridge, vertex)
         vertex.x += xOffset;
         vertex.y += yOffset;
         vertex.z += zOffset;
-        return sortClockwise(ridge, vertex);
+        return sortClockwise(ridge, vertex); //recursively restart
       }
     }
   }
   //last check
-  for(var i = 0; i < ridge.length; i++)
-  {
-    var a = i;
-    var b = (i + 1) % ridge.length;
-    var cross = ridge[a].clone().sub(center).cross(ridge[b].clone().sub(center)).normalize();
-    var dot = normal.dot(cross);
-    if(dot > 0 + e)
-      console.log('true');
-  }
+  // for(var i = 0; i < ridge.length; i++)
+  // {
+  //   var a = i;
+  //   var b = (i + 1) % ridge.length;
+  //   var cross = ridge[a].clone().sub(center).cross(ridge[b].clone().sub(center)).normalize();
+  //   var dot = normal.dot(cross);
+  // }
   return ridge;
 }
 
@@ -355,3 +370,72 @@ var connectVertexToHull = function(hull, vertex, ridge)
     hull.push(new Triangle([first, second, third]));
   }
 }
+//BOUNDING HULL END ###########################################################
+
+//COLLISION BEGIN #############################################################
+
+var mightBeColliding = function(model1, model2)
+{
+  var distance = model1.position.distanceTo(model2.position);
+  return distance < model1.boundingRadius + model2.boundingRadius
+}
+
+var getCenterOfHull = function(hull)
+{
+  if(hull.length == 0)
+    return
+
+  //get the center point of hull
+  var center = new THREE.Vector3();
+  hull.forEach(function(triangle){
+    center.add(triangle.getNormal().point);
+  });
+  center.divideScalar(hull.length)
+
+  return center;
+}
+//works for our purposes of checking convex hull (based on how we generate and needs)
+//but isn't technically correct in the general case
+var pointIsInsideHull = function(point, hull)
+{
+  var inside = true;
+  //check that each face is not looking at the center
+  hull.forEach(function(triangle){
+    var normal = triangle.getNormal();
+    var vectorTo = normal.point.clone().sub(point).normalize();
+    var dot = normal.direction.dot(vectorTo);
+    if(dot > 0)
+    {
+      // console.log('true');
+    }
+    else if(dot < 0)
+    {
+      inside = false;
+    }
+    else
+    {
+      // console.log('orthagonal');
+    }
+  });
+
+  // console.log(dot);
+  return inside;
+}
+
+var getMinkowskiDifference = function(hullA, hullB)
+{
+  //get the cross product of all points using relation A - B
+  var points = [];
+  var verticesA = extractVertices(hullA);
+  var verticesB = extractVertices(hullB);
+
+  verticesA.forEach(function(vA){
+    verticesB.forEach(function(vB){
+      points.push(vA.clone().sub(vB));
+    });
+  });
+
+  return QuickHull3D(points);
+}
+
+//COLLISION END ###############################################################

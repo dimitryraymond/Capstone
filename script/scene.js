@@ -193,6 +193,18 @@ Scene.prototype.updatePhysics = function()
       //do pixel perfect collision detection
       if(maybeColliding)
       {
+        console.log("Maybe Colliding");
+        var minkDiff = getMinkowskiDifference(this.models[i].getGlobalMesh(), this.models[j].getGlobalMesh());
+        if(pointIsInsideHull(new THREE.Vector3(), minkDiff))
+        {
+          //is colliding
+          console.log('yes');
+        }
+        else
+        {
+          //is not colliding
+          console.log('no');
+        }
         //bounding hull
         //check bounding hulls
       }
@@ -375,15 +387,15 @@ Scene.prototype.updateGraphics = function()
     var hullMesh = [];
     var debugVertexSet = [];
     var debugFaceSet = [];
-    model.getGlobalMesh(mesh, boundsMesh, hullMesh, debugVertexSet, debugFaceSet); //pass by reference
+    model.getGlobalRenderObjects(mesh, boundsMesh, hullMesh, debugVertexSet, debugFaceSet); //pass by reference
     //render actual model
     for(var j = 0; j < mesh.length; j++)
     {
       if(mesh[j].isClockwise(this.camera))
       {
-        // this.renderTriangle(mesh[j]);
-        // if(this.showDebug)
-          // this.renderNormal(mesh[j]);
+        this.renderTriangle(mesh[j]);
+        if(this.showDebug)
+          this.renderNormal(mesh[j]);
       }
     }
 
@@ -392,13 +404,13 @@ Scene.prototype.updateGraphics = function()
     {
       for(var j = 0; j < boundsMesh.length; j++)
       {
-        // this.renderTriangle(boundsMesh[j], 'red');
+        this.renderTriangle(boundsMesh[j], 'red');
       }
 
       for(var j = 0; j < hullMesh.length; j++)
       {
-        // this.renderTriangle(hullMesh[j], [hullMesh[j].color || 'rgba(0, 255, 0, .4)', 'blue']);
-        // this.renderNormal(hullMesh[j]);
+        this.renderTriangle(hullMesh[j], [hullMesh[j].color || 'rgba(0, 255, 0, .4)', 'blue']);
+        this.renderNormal(hullMesh[j]);
       }
 
       for(var j = 0; j < debugFaceSet.length; j++)
